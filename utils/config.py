@@ -4,35 +4,44 @@ from pathlib import Path
 from typing import List
 from pydantic import BaseModel, field_validator
 
-class GCPConfig(BaseModel, frozen=True):
-    """GCP-specific configuration (Immutable)."""
+class BaseConfig(BaseModel, frozen=True):
+    """Base class to avoid code repetition."""
+    @field_validator("*", mode="before")
+    @classmethod
+    def check_not_empty(cls, v):
+        if isinstance(v, str) and not v.strip():
+            raise ValueError("String fields cannot be empty")
+        return v
+
+class GCPConfig(BaseConfig):
     project_id: str
     location: str
     bucket_name: str
     gcs_log_folder: str
 
-    @field_validator("*")
+class MTAConfig(BaseConfig):
+    url: str
+    raw_prefix: str
+    salt: str
+
+    @field_validator("url")
     @classmethod
-    def check_not_empty(cls, v: str) -> str:
-        if isinstance(v, str) and not v.strip():
-            raise ValueError("String fields cannot be empty")
+    def validate_url_format(cls, v: str) -> str:
+        """Specific check to ensure the URL is secure and valid."""
+        if not v.startswith("https://"):
+            raise ValueError("The MTA URL must start with 'https://' for security")
         return v
 
-class Config(BaseModel, frozen=True):
-    """Global configuration class (Immutable)."""
+class Config(BaseConfig):
     gcp: GCPConfig
+    mta: MTAConfig
     datasets: List[str]
 
     @field_validator("datasets")
     @classmethod
-    def check_datasets(cls, v: List[str]) -> List[str]:
-        # Vérifie que la liste n'est pas vide
+    def check_datasets_not_empty(cls, v: List[str]) -> List[str]:
         if not v:
             raise ValueError("The 'datasets' list cannot be empty")
-        # Vérifie que chaque nom de dataset est valide
-        for name in v:
-            if not name.strip():
-                raise ValueError("Dataset names in the list cannot be empty")
         return v
 
     @classmethod

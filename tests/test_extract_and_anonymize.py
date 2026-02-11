@@ -1,0 +1,37 @@
+import pandas as pd
+from scripts import extract_and_anonymize
+
+# Test the atomic hashing function
+def test_hash_string():
+    name = "Abatangelo,Leonardo P"
+    salt = "test_salt"
+    
+    hash1 = extract_and_anonymize.hash_string(name, salt)
+    hash2 = extract_and_anonymize.hash_string(name, salt)
+    
+    assert len(hash1) == 16
+    assert hash1 == hash2  # Deterministic
+    assert hash1 != extract_and_anonymize.hash_string(name, "different_salt") # Salt matters
+
+# Test the data cleaning logic
+def test_handle_missing_names():
+    # Setup dummy data
+    data = {'Name': [" John Doe ", None]}
+    df = pd.DataFrame(data)
+    
+    result_df = extract_and_anonymize.handle_missing_names(df)
+    
+    assert result_df['Name'][0] == "John Doe"  # Check strip()
+    assert result_df['Name'][1] == "UNKNOWN_EMPLOYEE" # Check fillna()
+
+# Test the full orchestration
+def test_anonymize_data_removes_column():
+    data = {'Name': ["Alice"], 'Salary': [50000]}
+    df = pd.DataFrame(data)
+    salt = "secret"
+    
+    result_df = extract_and_anonymize.anonymize_data(df, salt)
+    
+    assert 'Name' not in result_df.columns
+    assert 'employee_id' in result_df.columns
+    assert result_df['Salary'][0] == 50000

@@ -1,6 +1,8 @@
 # --- Orchestration & Configuration ---
 PyYAML==6.0.3
 pydantic==2.12.5
+pandas==3.0.0
+pytest==9.0.2
 
 # --- Google Cloud SDK ---
 google-cloud-bigquery==3.40.0
