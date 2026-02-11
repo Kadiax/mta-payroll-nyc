@@ -2,9 +2,9 @@
 
 ## Google Cloud SDK Shell OAUTH
 
-gcloud config set project mta-payroll-nyc
-gcloud config list
-gcloud auth application-default login
+- gcloud config set project mta-payroll-nyc
+- gcloud config list
+- gcloud auth application-default login
 
 ## Power shell
 

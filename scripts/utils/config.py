@@ -1,55 +1,61 @@
-# utils/config.py
 import yaml
 import logging
 from pathlib import Path
+from typing import List
+from pydantic import BaseModel, field_validator
 
-class Config:
-    """Simple configuration class with type validation."""
-    
-    def __init__(self, config_dict: dict):
-        # Validate and set gcp config
-        gcp = config_dict.get("gcp", {})
-        self.project_id = self._validate_str(gcp.get("project_id"), "gcp.project_id")
-        self.location = self._validate_str(gcp.get("location"), "gcp.location")
-        self.bucket_name = self._validate_str(gcp.get("bucket_name"), "gcp.bucket_name")
-        self.gcs_log_folder = self._validate_str(gcp.get("gcs_log_folder"), "gcp.gcs_log_folder")
-        
-        # Validate and set datasets
-        self.datasets = self._validate_list(config_dict.get("datasets", []), "datasets")
-    
-    @staticmethod
-    def _validate_str(value, key: str) -> str:
-        if not isinstance(value, str):
-            raise TypeError(f"{key} must be str, got {type(value).__name__}")
-        if not value:
-            raise ValueError(f"{key} cannot be empty")
-        return value
-    
-    @staticmethod
-    def _validate_list(value, key: str) -> list:
-        if not isinstance(value, list):
-            raise TypeError(f"{key} must be list, got {type(value).__name__}")
-        if not all(isinstance(item, str) for item in value):
-            raise TypeError(f"All items in {key} must be strings")
-        return value
+class GCPConfig(BaseModel, frozen=True):
+    """GCP-specific configuration (Immutable)."""
+    project_id: str
+    location: str
+    bucket_name: str
+    gcs_log_folder: str
 
-    @staticmethod
-    def load_config(logger: logging.Logger = None) -> "Config":
-        """Loads and validates the pipeline configuration from YAML file."""
-        config_path = "./config.yaml"
+    @field_validator("*")
+    @classmethod
+    def check_not_empty(cls, v: str) -> str:
+        if isinstance(v, str) and not v.strip():
+            raise ValueError("String fields cannot be empty")
+        return v
+
+class Config(BaseModel, frozen=True):
+    """Global configuration class (Immutable)."""
+    gcp: GCPConfig
+    datasets: List[str]
+
+    @field_validator("datasets")
+    @classmethod
+    def check_datasets(cls, v: List[str]) -> List[str]:
+        # Vérifie que la liste n'est pas vide
+        if not v:
+            raise ValueError("The 'datasets' list cannot be empty")
+        # Vérifie que chaque nom de dataset est valide
+        for name in v:
+            if not name.strip():
+                raise ValueError("Dataset names in the list cannot be empty")
+        return v
+
+    @classmethod
+    def load_config(cls, logger: logging.Logger = None) -> "Config":
+        """Loads, validates, and returns the configuration from the YAML file."""
+        config_path = Path("./config.yaml")
         
         if logger:
             logger.info(f"Loading configuration from: {config_path}")
         
-        if not Path(config_path).exists():
-            raise FileNotFoundError(f"Config file not found: {config_path}")
+        if not config_path.exists():
+            error_msg = f"Config file not found: {config_path}"
+            if logger:
+                logger.error(error_msg)
+            raise FileNotFoundError(error_msg)
         
         with open(config_path, "r") as f:
             config_dict = yaml.safe_load(f)
         
-        config = Config(config_dict)
+        # Pydantic valide tout ici : les types, le contenu et l'immuabilité (frozen)
+        config = cls(**config_dict)
         
         if logger:
-            logger.info("Configuration loaded and validated successfully")
+            logger.info("Configuration loaded and validated successfully with Pydantic")
         
         return config
