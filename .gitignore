@@ -1,0 +1,63 @@
+# --- Python & Environnement ---
+.venv/
+venv/
+env/
+dbt_env/
+bin/
+lib/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# --- Byte-compiled / Optimisation ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- dbt (Data Build Tool) ---
+dbt_packages/
+logs/
+target/
+profiles.yml
+# Note: On ignore le profiles.yml car il contient souvent tes accès locaux
+
+# --- Google Cloud & Sécurité ---
+# Très important : ne jamais commit tes clés JSON
+*.json
+!composer*.json # Sauf si c'est un fichier de config PHP spécifique
+.gcloud/
+.gsutil/
+
+# --- Variables d'environnement & Secrets ---
+.env
+.env.local
+.env.*.local
+config.yaml
+# Si ton config.yaml contient des IDs de projet réels, il est parfois préférable de ne commit qu'un config.example.yaml
+
+# --- IDE & OS ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- Elementary ---
+edr_target/
+elementary_output/
+
+
+# --- Data --- #
+*.csv
+/data/
+documentation/plan/
