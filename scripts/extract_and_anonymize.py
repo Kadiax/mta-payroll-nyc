@@ -68,13 +68,13 @@ def main():
 
     try:
         # 2. Extract
-        raw_df = download_mta_data(cfg.mta.url)
+        raw_df = download_mta_data(cfg.source.url)
         
         # 3. Transform (Anonymize)
-        clean_df = anonymize_data(raw_df, cfg.mta.salt) 
+        clean_df = anonymize_data(raw_df, cfg.source.salt) 
         
         # 4. Load
-        upload_to_gcs(clean_df, cfg.gcp.bucket_name, cfg.mta.raw_prefix, storage_client)
+        upload_to_gcs(clean_df, cfg.gcp.bucket_name, cfg.source.raw_prefix, storage_client)
         
         logger.info("ETL Process: Extraction and Anonymization completed successfully.")
 

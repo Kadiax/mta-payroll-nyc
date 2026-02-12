@@ -19,7 +19,7 @@ class GCPConfig(BaseConfig):
     bucket_name: str
     gcs_log_folder: str
 
-class MTAConfig(BaseConfig):
+class SourceConfig(BaseConfig):
     url: str
     raw_prefix: str
     salt: str
@@ -36,7 +36,7 @@ class MTAConfig(BaseConfig):
 
 class Config(BaseConfig):
     gcp: GCPConfig
-    mta: MTAConfig
+    source: SourceConfig
     datasets: List[str]
 
     @field_validator("datasets")

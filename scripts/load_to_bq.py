@@ -65,7 +65,7 @@ def _move_to_raw(bq_client, fname, table_id, temp_id, location):
 
 def _process_single_file(bq_client, fname, table_id, temp_id, cfg, schema):
     """Orchestrates the loading of a single file."""
-    uri = f"gs://{cfg.gcp.bucket_name}/{cfg.mta.raw_prefix}{fname}"
+    uri = f"gs://{cfg.gcp.bucket_name}/{cfg.source.raw_prefix}{fname}"
     try:
         _load_to_temp(bq_client, uri, temp_id, schema)
         _ensure_raw_table(bq_client, table_id, schema)
@@ -80,7 +80,7 @@ def reconcile_load_integrity(storage_client, bq_client, cfg, table_id):
     """
     # 1. Count files in GCS
     bucket = storage_client.bucket(cfg.gcp.bucket_name)
-    blobs = bucket.list_blobs(prefix=cfg.mta.raw_prefix)
+    blobs = bucket.list_blobs(prefix=cfg.source.raw_prefix)
     gcs_count = len([b for b in blobs if b.name.endswith(".csv")])
 
     # 2. Count distinct source_files in BQ
@@ -104,12 +104,12 @@ def run_load_pipeline(cfg, bq_client, storage_client):
     """Orchestrates the identification and loading of new GCS files."""
     # 1. Prepare Identifiers
     dataset_id = cfg.datasets[0] 
-    full_table_id = f"{cfg.gcp.project_id}.{dataset_id}.{cfg.mta.raw_table_name}"
+    full_table_id = f"{cfg.gcp.project_id}.{dataset_id}.{cfg.source.raw_table_name}"
     temp_table_id = f"{full_table_id}_temp"
 
     # 2. Identify new files (Idempotency check)
     bucket = storage_client.bucket(cfg.gcp.bucket_name)
-    blobs = bucket.list_blobs(prefix=cfg.mta.raw_prefix)
+    blobs = bucket.list_blobs(prefix=cfg.source.raw_prefix)
     gcs_files = {b.name.split("/")[-1] for b in blobs if b.name.endswith(".csv")}
     
     loaded_files = get_already_loaded_files(bq_client, full_table_id, cfg.gcp.location)
@@ -120,7 +120,7 @@ def run_load_pipeline(cfg, bq_client, storage_client):
         return
 
     # 3. Load Schema and Process
-    schema = read_schema(cfg.mta.raw_schema_name)
+    schema = read_schema(cfg.source.raw_schema_name)
     for fname in files_to_process:
         _process_single_file(bq_client, fname, full_table_id, temp_table_id, cfg, schema)
         logger.info(f"Successfully loaded {fname} to BigQuery.")
