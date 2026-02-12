@@ -23,6 +23,8 @@ class MTAConfig(BaseConfig):
     url: str
     raw_prefix: str
     salt: str
+    raw_table_name: str  
+    raw_schema_name: str
 
     @field_validator("url")
     @classmethod
