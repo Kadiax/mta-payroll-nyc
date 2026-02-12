@@ -35,3 +35,22 @@ def test_anonymize_data_removes_column():
     assert 'Name' not in result_df.columns
     assert 'employee_id' in result_df.columns
     assert result_df['Salary'][0] == 50000
+
+def test_unknown_employees_have_same_id():
+    """
+    Checks if multiple unknown employees result in the same hashed ID.
+    Note: Since hashing is deterministic, same input = same output.
+    """
+    data = {'Name': [None, None]}  # Two missing names
+    df = pd.DataFrame(data)
+    salt = "secret_salt"
+    
+    # 1. Cleaning (transforms None into UNKNOWN_EMPLOYEE)
+    df_cleaned = extract_and_anonymize.handle_missing_names(df)
+    
+    # 2. Anonymization (hashes the "UNKNOWN_EMPLOYEE" string)
+    result_df = extract_and_anonymize.anonymize_data(df_cleaned, salt)
+    
+    # Verification
+    # Since both names are "UNKNOWN_EMPLOYEE", they must result in the same ID
+    assert result_df['employee_id'][0] == result_df['employee_id'][1]
