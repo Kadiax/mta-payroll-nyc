@@ -25,20 +25,21 @@ def hash_string(value: str, salt: str) -> str:
 
 def anonymize_data(df: pd.DataFrame, salt: str) -> pd.DataFrame:
     """
-    Orchestrates the anonymization process
+    Orchestrates the anonymization process by replacing names with their hash.
     """
     if 'Name' not in df.columns:
+        logger.warning("Column 'Name' not found in DataFrame.")
         return df
 
-    # 1. Clean
+    # 1. Clean (Handles nulls and strips)
     df = handle_missing_names(df)
 
-    # 2. Transform
-    logger.info("Applying salted hashing to employee names...")
-    df['employee_id'] = df['Name'].apply(lambda x: hash_string(x, salt))
+    # 2. Transform (We overwrite the ‘Name’ column directly)
+    logger.info("Anonymizing names in-place...")
+    df['Name'] = df['Name'].apply(lambda x: hash_string(x, salt))
 
-    # 3. Finalize
-    return df.drop(columns=['Name'])
+    # 3. Finalize (We rename it here for clarity in dbt)
+    return df.rename(columns={'Name': 'name_hash'})
 
 def download_mta_data(url: str) -> pd.DataFrame:
     """Downloads the raw CSV from MTA Open Data Portal."""
