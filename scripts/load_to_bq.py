@@ -53,7 +53,7 @@ def _ensure_raw_table(bq_client, table_id, schema):
     if not table_exists(bq_client, table_id):
         full_schema = schema + [
             bigquery.SchemaField("source_file", "STRING"),
-            bigquery.SchemaField("ingested_at", "TIMESTAMP")
+            bigquery.SchemaField("raw_ingested_at", "TIMESTAMP")
         ]
         bq_client.create_table(bigquery.Table(table_id, schema=full_schema))
 

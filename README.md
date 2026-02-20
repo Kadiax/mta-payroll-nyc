@@ -17,6 +17,6 @@
 - cd dbt_mta_payroll_nyc
 - dbt deps
 
-### GDPR Compliance
+## GDPR Compliance
 
-To ensure data privacy, this pipeline implements PII Redaction. Employee names are never stored in the Cloud. A pseudonymization process using SHA-256 hashing is performed locally during the extraction phase to create a unique employee_id while maintaining data utility for analytical purposes.
+To ensure data privacy, this pipeline implements PII Redaction. Employee names are never stored in the Cloud. A pseudonymization process using SHA-256 hashing is performed locally during the extraction phase to create a unique name_hash while maintaining data utility for analytical purposes.
