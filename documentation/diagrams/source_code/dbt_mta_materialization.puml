@@ -1,0 +1,66 @@
+@startuml
+' --- Configuration ---
+!theme plain
+left to right direction
+skinparam nodesep 40
+skinparam ranksep 60
+skinparam shadowing false
+skinparam RoundCorner 10
+
+' --- Styling Definitions ---
+skinparam rectangle {
+    BackgroundColor<<Bronze>> #E0E0E0
+    BackgroundColor<<Silver>> #D1EAFF
+    BackgroundColor<<GoldFact>> #FFF4D1
+    BackgroundColor<<GoldDim>> #F9F9F9
+    BackgroundColor<<Reporting>> #FFE5D1
+}
+
+' --- Nodes ---
+package "Bronze (Raw)" {
+    rectangle "raw_mta_data [EXT TABLE]" <<Bronze>> as B1
+}
+
+package "Silver (Staging)" {
+    rectangle "stg_mta_payroll [VIEW]" <<Silver>> as S1
+}
+
+package "Gold (Star Schema)" {
+    folder "Dimensions (References)" #F9F9F9 {
+        rectangle "dim_employee [SCD2]" <<GoldDim>> as G_DE
+        rectangle "dim_calendar [SEED]" <<GoldDim>> as G_DC
+        rectangle "dim_agency [TABLE]" <<GoldDim>> as G_DA
+        rectangle "dim_job_title [TABLE]" <<GoldDim>> as G_DJ
+    }
+    
+    folder "Facts (Events)" #FFFDE7 {
+        rectangle "fct_payroll [INC]" <<GoldFact>> as G_FP
+        rectangle "fct_employment_events [INC]" <<GoldFact>> as G_FEE
+        rectangle "fct_agency_stats [TABLE]" <<GoldFact>> as G_FAS
+    }
+}
+
+package "Consumption (Reporting)" {
+    rectangle "OBT Reporting Layer\n(Authorized Views)" <<Reporting>> as R_OBT
+}
+
+' --- Dependencies (Lineage) ---
+B1 --> S1
+S1 --> G_FP
+S1 --> G_FEE
+S1 --> G_FAS
+S1 --> G_DE
+S1 --> G_DA
+S1 --> G_DJ
+
+
+G_DE --> R_OBT
+G_DC --> R_OBT
+G_DA --> R_OBT
+G_DJ --> R_OBT
+G_FEE --> R_OBT
+G_FP --> R_OBT
+G_FAS --> R_OBT
+
+R_OBT --> [Looker Studio]
+@enduml
