@@ -1,0 +1,43 @@
+version: 2
+
+sources:
+  - name: bronze_mta_payroll
+    schema: bronze
+    tables:
+      - name: raw_mta_payroll
+        description: "Raw payroll data ingested from GCS into BigQuery (Bronze Layer)"
+        columns:
+          - name: Year
+            description: "Fiscal year of the payroll record."
+          - name: name_hash
+            description: "Salted SHA-256 hash of the employee name (Anonymized)."
+            tests:
+              - not_null # Security: hashing is mandatory
+          - name: Working_Agency
+            description: "MTA Agency name (e.g., NYCTA, MMNR)."
+          - name: Start_Date
+            description: "Employee agency start date (MM/DD/YYYY)."
+          - name: Separation_Date
+            description: "Date the employee left the agency, if applicable."
+          - name: Title
+            description: "Official job title description."
+          - name: Department
+            description: "Internal department code or name."
+          - name: Pay_Basis
+            description: "Frequency of pay (e.g., Biweekly, Hourly)."
+          - name: Hourly_Rate
+            description: "Hourly pay rate if applicable."
+          - name: Regular_Pay
+            description: "Gross pay for regular working hours."
+          - name: Overtime_Pay
+            description: "Amount paid for overtime hours."
+          - name: Cash_Outs
+            description: "Payouts for unused leave or other benefits."
+          - name: Retro_Pay
+            description: "Back-pay for previous periods."
+          - name: Other_Pay
+            description: "Miscellaneous additional compensation."
+          - name: Total_Earnings
+            description: "Sum of all pay components for the period."
+          - name: Updated_At
+            description: "Timestamp when the record was last updated by source."
