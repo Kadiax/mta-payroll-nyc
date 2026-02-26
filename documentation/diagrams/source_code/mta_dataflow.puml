@@ -1,0 +1,50 @@
+@startuml
+' --- STYLE CONFIGURATION (Inspiré de Lucidchart) ---
+!theme black-knight
+skinparam backgroundColor #121212
+skinparam roundcorner 10
+skinparam shadowing false
+skinparam ArrowColor #FFFFFF
+skinparam ArrowThickness 1.5
+
+' Styles pour les boîtes
+skinparam package {
+    BackgroundColor #1A1A1A
+    BorderColor #444444
+    FontColor #00D2FF
+}
+
+' --- COMPOSANTS ---
+
+package "DATA INGESTION" #0D47A1 {
+    node "MTA CSV Files" as Source #424242
+    storage "<b>Google GCS</b>" as GCS #2E7D32
+}
+
+package "BIGQUERY DATA WAREHOUSE" #263238 {
+    database "<b>BRONZE</b>\n(Raw Tables)" as Raw #424242
+    
+    package "DATA TRANSFORMATION (dbt)" #B71C1C {
+        database "<b>SILVER</b>\n(Staging)" as Staging #424242
+        database "<b>GOLD</b>\n(Star Schema)" as Mart #424242
+    }
+    
+    database "<b>OBT</b>\n(BI Layer)" as OBT #E65100
+}
+
+package "DATA CONSUMPTION" #0D47A1 {
+    component "<b>Looker Studio</b>" as BI #424242
+}
+
+' --- FLUX DE DONNÉES ---
+
+Source -right-> GCS : "Python (ingest)"
+GCS -right-> Raw : "Python (load)"
+
+Raw -right-> Staging : "dbt cleaning"
+Staging -right-> Mart : "dbt modeling"
+Mart -down-> OBT : "dbt denormalize"
+
+OBT -right-> BI : "Live Query"
+
+@enduml

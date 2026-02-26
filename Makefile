@@ -35,5 +35,8 @@ extract:
 load:
 	docker run --rm -v "$(GCLOUD_CONFIG_LOCAL):/root/.config/gcloud" -e GOOGLE_APPLICATION_CREDENTIALS=$(ADC_INTERNAL) $(IMAGE_NAME) python -m scripts.load_to_bq
 
+transform:
+	docker run --rm -v "$(GCLOUD_CONFIG_LOCAL):/root/.config/gcloud" -e GOOGLE_APPLICATION_CREDENTIALS=$(ADC_INTERNAL) $(IMAGE_NAME) python -m scripts.transform
+
 # Execute the full pipeline: Build -> Test -> Run
-all: build test create-datasets extract load
+all: build test create-datasets extract load transform

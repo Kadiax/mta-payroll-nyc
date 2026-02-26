@@ -1,0 +1,43 @@
+@startuml
+!theme toy
+skinparam linetype ortho
+
+' --- STAR 1 : PAYROLL ---
+package "Payroll Process" {
+    entity "fct_payroll" as FP <<Fact>> {}
+    entity "dim_employee" as DE1 <<Dim>>
+    entity "dim_agency" as DA1 <<Dim>>
+    entity "dim_job_title" as DJT1 <<Dim>>
+    entity "dim_calendar" as DC1 <<Dim>>
+
+    FP }|--|| DE1
+    FP }|--|| DA1
+    FP }|--|| DJT1
+    FP }|--|| DC1
+}
+
+' --- STAR 2 : EVENTS ---
+package "Human Resources Process" {
+    entity "fct_employment_events" as FE <<Fact>> {}
+    entity "dim_employee" as DE2 <<Dim>>
+    entity "dim_agency" as DA2 <<Dim>>
+    entity "dim_job_title" as DJT2 <<Dim>>
+    entity "dim_calendar" as DC2 <<Dim>>
+
+    FE }|--|| DE2
+    FE }|--|| DA2
+    FE }|--|| DJT2
+    FE }|--|| DC2
+}
+
+' --- STAR 3 : STATS ---
+package "Reporting Process" {
+    entity "fct_agency_stats" as FS <<Fact>> {}
+    entity "dim_agency" as DA3 <<Dim>>
+    entity "dim_calendar" as DC3 <<Dim>>
+
+    FS }|--|| DA3
+    FS }|--|| DC3
+}
+
+@enduml

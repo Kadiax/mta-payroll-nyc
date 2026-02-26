@@ -1,0 +1,64 @@
+version: 2
+
+models:
+  - name: stg_mta_payroll
+    description: "Staging model for MTA payroll data. Data is cleaned, casted, and trimmed."
+    columns:
+      - name: name_hash
+        description: "Anonymized hash of the employee name."
+        tests:
+          - not_null
+      - name: fiscal_year
+        description: "Fiscal year of the payroll record."
+        tests:
+          - not_null
+          # Adjusted for 5 years of potential reporting
+          - dbt_expectations.expect_column_values_to_be_in_set:
+              arguments:
+                value_set: [2025, 2026, 2027, 2028, 2029, 2030]
+                quote_values: false
+
+      - name: agency_name
+        description: "MTA Agency name (cleaned via TRIM)."
+        tests:
+          - not_null
+
+      - name: total_earnings
+        description: "Total earnings for the period. Validates against extreme outliers."
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: -100000.0
+                max_value: 1000000.0
+                row_condition: "total_earnings is not null"
+
+      - name: job_title
+        description: "Official job title (cleaned via TRIM). Defaults to 'Unknown' if missing."
+        tests:
+          - not_null
+
+      - name: department_name
+        description: "Department name (cleaned via TRIM). Defaults to 'Unknown' if missing."
+        tests:
+          - not_null
+
+      - name: pay_basis
+        description: "Frequency of pay (cleaned via TRIM). Defaults to 'Unknown' if missing."
+        tests:
+          - not_null
+
+      - name: source_file
+        description: "Name of the source file from which the record was ingested."
+        tests:
+          - not_null
+
+      - name: raw_ingested_at
+        description: "Timestamp when the record was ingested into the raw layer."
+        tests:
+          - not_null
+
+      - name: stg_processed_at
+        description: "Timestamp when the record was processed in the staging layer."
+        tests:
+          - not_null

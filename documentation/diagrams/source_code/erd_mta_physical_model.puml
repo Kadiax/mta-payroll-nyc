@@ -1,0 +1,99 @@
+@startuml
+!theme toy
+skinparam linetype ortho
+
+' --- STAR 1 : PAYROLL ---
+package "Payroll Process" {
+
+    entity "dim_employee" as DE1 <<Dim>> {
+        * employee_key : INT64 [PK]
+         name_hash : STRING
+         start_date : DATE
+         separation_date : DATE
+         department_name : STRING
+         dbt_scd_id : STRING
+         dbt_updated_at : TIMESTAMP
+         dbt_valid_from : TIMESTAMP
+         dbt_valid_to : TIMESTAMP
+    }
+    entity "dim_agency" as DA1 <<Dim>> {
+        * agency_key : INT64 [PK]
+         agency_name : STRING
+    }
+    entity "dim_job_title" as DJT1 <<Dim>> {
+        * job_title_key : INT64 [PK]
+         job_title : STRING
+         pay_basis : STRING
+    }
+    entity "dim_calendar" as DC1 <<Dim>> {
+        * id : STRING [PK]
+         full_date : DATE
+         year : INT64
+         year_week : INT64
+         year_day : INT64
+         fiscal_year : INT64
+         fiscal_qtr : INT64
+         month : INT64
+         month_name : STRING
+         week_day : STRING
+         day_name : STRING
+         day_is_weekday : INT64
+    }
+
+
+    entity "fct_payroll" as FP <<Fact>> {
+        * payroll_key : INT64 [PK]
+        * employee_key : INT64 [FK]
+        * agency_key : INT64 [FK]
+        * job_title_key : INT64 [FK]
+        * fiscal_year : INT64 [FK]
+         hourly_rate : FLOAT64
+         regular_pay : FLOAT64
+         overtime_pay : FLOAT64
+         cash_outs : FLOAT64
+         retro_pay : FLOAT64
+         other_pay : FLOAT64
+         total_earnings : FLOAT64
+         record_updated_at : DATE
+    }
+
+    entity "fct_employment_events" as FE <<Fact>> {
+        * event_key : INT64 [PK]
+        * employee_key : INT64 [FK]
+        * agency_key : INT64 [FK]
+        * job_title_key : INT64 [FK]
+        * fiscal_year : INT64 [FK]
+         event_date : DATE
+         event_type : STRING
+
+    }
+
+    entity "fct_agency_stats" as FS <<Fact>> {
+        * agency_stats_key : INT64 [PK]
+        * agency_key : INT64 [FK]
+        * fiscal_year : INT64 [FK]
+         total_payroll_cost : FLOAT64
+         total_overtime_pay : FLOAT64
+         avg_salary : FLOAT64
+         count_hires : INT64
+         count_separations : INT64
+         count_employees : INT64
+    }
+
+    FP }|--|| DE1
+    FP }|--|| DA1
+    FP }|--|| DJT1
+    FP }|--|| DC1
+
+    FE }|--|| DE1
+    FE }|--|| DA1
+    FE }|--|| DJT1
+    FE }|--|| DC1
+
+    FS }|--|| DA1
+    FS }|--|| DC1
+}
+
+
+
+@enduml
