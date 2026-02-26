@@ -23,7 +23,7 @@ The pipeline follows the Medallion architecture to ensure data quality and trace
 | **BRONZE**      | Raw, immutable data landed from GCS.             | External tables or `bq load`.         |
 | **SILVER**      | Cleaned and standardized staging models.         | dbt models with casting and renaming. |
 | **GOLD (Star)** | Business-ready Star Schema (Facts & Dimensions). | `fct_payroll`, `dim_employee`.        |
-| **OBT**         | One Big Table optimized for BI performance.      | Denormalized view for Looker Studio.  |
+| **BI**          | One Big Table optimized for BI performance.      | Denormalized view for Looker Studio.  |
 
 ---
 
@@ -35,28 +35,19 @@ We implement Staging Layer as Views to ensure "Late Binding." This allows for im
 
 ### 🔄 Dimensional Modeling (Gold):
 
-#### dim_employee : Slowly Changing Dimensions (SCD)
-
-We implement **SCD Type 2** on `dim_employee` to track historical changes (e.g., department transfers). This is managed via dbt snapshots:
-
-- `dbt_valid_from`: Start of the record's validity.
-- `dbt_valid_to`: End of the record's validity (null if current).
-
 #### dim_calendar : Seed
 
 Unlike source-dependent dimensions, dim_calendar is managed as a dbt seed to ensure a continuous and enriched time-series reference, enabling accurate trend analysis regardless of gaps in the source payroll data.
 
-#### dim_agency & dim_job_title : Table
+#### dim_employee dim_agency & dim_job_title : Table
 
 These are reference dimensions with low volatility. They are materialized as **Tables**, ensuring that any updates in agency naming or job classifications are fully refreshed during each run without the overhead of incremental logic.
 
-#### Fact Tables : Incremental vs. Table
+#### Fact Table : Incremental
 
-- **fct_payroll & fct_employment_events (Incremental)**: These tables handle large volumes of event-based data. Using an **Incremental** strategy ensures we only process the latest payroll periods, drastically reducing BigQuery slot usage and processing costs.
+- **fct_payroll (Incremental merge)**: ThIS table handle large volumes of event-based data. Using an **Incremental** strategy ensures we only process the latest payroll periods, drastically reducing BigQuery slot usage and processing costs.
 
-- **fct_agency_stats (Table)**: To ensure aggregate consistency across historical periods, this summary table is fully refreshed. This prevents data drift when historical payroll records are updated or backfilled.
-
-### 🔄 Reporting Layer (OBT):
+### 🔄 Reporting Layer (BI):
 
 Instead of connecting Looker Studio directly to the Star Schema, We implemente the One Big Table (OBT) pattern:
 
