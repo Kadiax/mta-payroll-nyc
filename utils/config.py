@@ -19,7 +19,14 @@ class GCPConfig(BaseConfig):
     bucket_name: str
     gcs_log_folder: str
     dbt_project_dir: str
+    datasets: List[str]
 
+    @field_validator("datasets")
+    @classmethod
+    def check_datasets_not_empty(cls, v: List[str]) -> List[str]:
+        if not v:
+            raise ValueError("The 'datasets' list cannot be empty")
+        return v
 class SourceConfig(BaseConfig):
     url: str
     raw_prefix: str
@@ -38,14 +45,7 @@ class SourceConfig(BaseConfig):
 class Config(BaseConfig):
     gcp: GCPConfig
     source: SourceConfig
-    datasets: List[str]
 
-    @field_validator("datasets")
-    @classmethod
-    def check_datasets_not_empty(cls, v: List[str]) -> List[str]:
-        if not v:
-            raise ValueError("The 'datasets' list cannot be empty")
-        return v
 
     @classmethod
     def load_config(cls, logger: logging.Logger = None) -> "Config":

@@ -42,7 +42,7 @@ def main():
     logger.info("Starting dataset creation process...")
     
     # 4. Iterate over dataset list from config
-    for name in cfg.datasets:
+    for name in cfg.gcp.datasets:
         create_bigquery_dataset(
             bq_client, 
             cfg.gcp.project_id, 
