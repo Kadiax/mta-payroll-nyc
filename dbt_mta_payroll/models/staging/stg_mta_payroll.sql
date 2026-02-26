@@ -13,7 +13,7 @@ renamed_and_cast AS (
         TRIM(CAST(name_hash AS STRING)) AS name_hash,
         TRIM(COALESCE(CAST(Working_Agency AS STRING), 'Unknown')) AS agency_name,
         TRIM(COALESCE(CAST(Title AS STRING), 'Unknown')) AS job_title,
-        TRIM(CAST(Department AS STRING)) AS department_name,
+        TRIM(COALESCE(CAST(Department AS STRING), 'Unknown')) AS department_name,
         TRIM(COALESCE(CAST(Pay_Basis AS STRING), 'Unknown')) AS pay_basis,
 
         -- 3. Dates (Conversion MM/DD/YYYY to DATE)
