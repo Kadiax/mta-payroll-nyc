@@ -18,6 +18,7 @@ class GCPConfig(BaseConfig):
     location: str
     bucket_name: str
     gcs_log_folder: str
+    dbt_project_dir: str
 
 class SourceConfig(BaseConfig):
     url: str

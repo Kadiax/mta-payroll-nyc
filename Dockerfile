@@ -4,6 +4,7 @@ FROM python:3.11-slim
 # Prevent Python from writing .pyc files and enable unbuffered logging
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+ENV DBT_PROJECT_DIR=/app/dbt_mta_payroll
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -23,6 +24,10 @@ COPY utils/ ./utils/
 COPY tests/ ./tests/
 COPY pyproject.toml .
 COPY config.yaml .
+
+# Copy dbt project and install dependencies
+COPY dbt_mta_payroll/ ./dbt_mta_payroll/
+RUN cd dbt_mta_payroll && dbt deps
 
 # Default command (can be overridden by Makefile or docker run)
 CMD ["python"]

@@ -1,0 +1,18 @@
+# dbt artifacts
+dbt_mta_payroll/target/
+dbt_mta_payroll/dbt_packages/
+dbt_mta_payroll/logs/
+
+# Python artifacts
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Git
+.git
+.gitignore
+
+# Env & Secrets
+.env
+dbt_mta_payroll/.user.yml
+dbt_mta_payroll/package-lock.yml
