@@ -1,9 +1,9 @@
 {{ config(
-    materialized='view',
+    materialized='table',
     partition_by={
       "field": "fiscal_year",
       "data_type": "int64",
-      "range": {"start": 2014, "end": 2050, "interval": 1}
+      "range": {"start": 2025, "end": 2030, "interval": 1}
     },
     cluster_by=["agency_name", "job_title"]
 ) }}
@@ -27,6 +27,9 @@ dim_job_title as (
 select
     -- 1. Identifiers (We keep the keys just in case, but we prefer text)
     f.payroll_key,
+    f.employee_key,
+    f.agency_key,
+    f.job_title_key,
     
     -- 2. Employee Attributes
     de.name_hash,

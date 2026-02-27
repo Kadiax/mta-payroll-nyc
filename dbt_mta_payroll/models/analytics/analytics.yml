@@ -10,6 +10,12 @@ models:
       - name: agency_name
         tests:
           - not_null # Ensures no agency was "lost" in the join
+      - name: agency_key
+        tests:
+          - not_null # Ensures every payroll record is linked to an agency
+      - name: job_title_key
+        tests:
+          - not_null # Ensures every payroll record is linked to a job title
       - name: job_title
         tests:
           - not_null # Ensures no job title was "lost" in the join
@@ -19,4 +25,65 @@ models:
       - name: name_hash
         tests:
           - not_null # Ensures every payroll record is linked to an employee
+      - name: employee_key
+        tests:
+          - not_null # Ensures no employee name was "lost" in the join
+  - name: v_payroll_kpis
+    description: "Aggregation view for Looker Studio Scorecards and high-level charts."
+    columns:
+      - name: fiscal_year
+        tests:
+          - not_null
 
+      - name: agency_name
+        tests:
+          - not_null
+
+      - name: headcount
+        description: "Should always be a positive number."
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 1
+
+      - name: total_payroll
+        tests:
+          - not_null
+    # Custom test to ensure the average salary is not higher than total payroll (basic sanity check)
+    tests:
+      - dbt_utils.expression_is_true:
+          expression: "avg_regular_salary <= total_payroll"
+
+  - name: v_payroll_kpis
+    description: "Aggregated view for high-level KPIs (Total Payroll, Avg Salary, Headcount)."
+    columns:
+      - name: fiscal_year
+        tests:
+          - not_null
+      - name: agency_name
+        tests:
+          - not_null
+      - name: headcount
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+      - name: total_payroll
+        tests:
+          - not_null
+
+  - name: mv_overtime_by_job
+    description: "Materialized view for Job Title analysis. Optimized for Bar Charts."
+    columns:
+      - name: job_title
+        tests:
+          - not_null
+      - name: total_overtime_pay
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+              severity: warn
+      - name: employee_count
+        tests:
+          - not_null
