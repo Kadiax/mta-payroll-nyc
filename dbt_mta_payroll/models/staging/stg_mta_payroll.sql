@@ -22,13 +22,13 @@ renamed_and_cast AS (
         SAFE.PARSE_DATE('%m/%d/%Y', Updated_At) AS record_updated_at,
 
         -- 4. Numerics / Floats (SAFE_CAST to handle non-numeric gracefully)
-        SAFE_CAST(Hourly_Rate AS FLOAT64) AS hourly_rate,
-        SAFE_CAST(Regular_Pay AS FLOAT64) AS regular_pay,
-        SAFE_CAST(Overtime_Pay AS FLOAT64) AS overtime_pay,
-        SAFE_CAST(Cash_Outs AS FLOAT64) AS cash_outs,
-        SAFE_CAST(Retro_Pay AS FLOAT64) AS retro_pay,
-        SAFE_CAST(Other_Pay AS FLOAT64) AS other_pay,
-        SAFE_CAST(Total_Earnings AS FLOAT64) AS total_earnings,
+        COALESCE(SAFE_CAST(Hourly_Rate AS FLOAT64), 0) AS hourly_rate,
+        COALESCE(SAFE_CAST(Regular_Pay AS FLOAT64), 0) AS regular_pay,
+        COALESCE(SAFE_CAST(Overtime_Pay AS FLOAT64), 0) AS overtime_pay,
+        COALESCE(SAFE_CAST(Cash_Outs AS FLOAT64), 0) AS cash_outs,
+        COALESCE(SAFE_CAST(Retro_Pay AS FLOAT64), 0) AS retro_pay,
+        COALESCE(SAFE_CAST(Other_Pay AS FLOAT64), 0) AS other_pay,
+        COALESCE(SAFE_CAST(Total_Earnings AS FLOAT64), 0) AS total_earnings,
 
         -- 5. Metadata & Lineage from Source
         TRIM(CAST(source_file AS STRING)) AS source_file,

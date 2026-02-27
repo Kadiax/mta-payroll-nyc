@@ -50,18 +50,32 @@ models:
 
       - name: hourly_rate
         description: "{{ doc('col_hourly_rate') }}"
+        tests:
+          - not_null
       - name: regular_pay
         description: "{{ doc('col_regular_pay') }}"
+        tests:
+          - not_null
       - name: overtime_pay
         description: "{{ doc('col_overtime_pay') }}"
+        tests:
+          - not_null
       - name: cash_outs
         description: "{{ doc('col_cash_outs') }}"
+        tests:
+          - not_null
       - name: retro_pay
         description: "{{ doc('col_retro_pay') }}"
+        tests:
+          - not_null
       - name: other_pay
         description: "{{ doc('col_other_pay') }}"
+        tests:
+          - not_null
       - name: record_updated_at
         description: "{{ doc('col_updated_at') }}"
+        tests:
+          - not_null
 
       - name: source_file
         description: "{{ doc('col_source_file') }}"
