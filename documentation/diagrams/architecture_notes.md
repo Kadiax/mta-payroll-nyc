@@ -18,12 +18,12 @@ This project implements a public sector payroll analytics platform using a moder
 
 The pipeline follows the Medallion architecture to ensure data quality and traceability:
 
-| Layer           | Description                                      | Implementation                        |
-| :-------------- | :----------------------------------------------- | :------------------------------------ |
-| **BRONZE**      | Raw, immutable data landed from GCS.             | External tables or `bq load`.         |
-| **SILVER**      | Cleaned and standardized staging models.         | dbt models with casting and renaming. |
-| **GOLD (Star)** | Business-ready Star Schema (Facts & Dimensions). | `fct_payroll`, `dim_employee`.        |
-| **BI**          | One Big Table optimized for BI performance.      | Denormalized view for Looker Studio.  |
+| Layer           | Description                                       | Implementation                        |
+| :-------------- | :------------------------------------------------ | :------------------------------------ |
+| **BRONZE**      | Raw, immutable data landed from GCS.              | External tables or `bq load`.         |
+| **SILVER**      | Cleaned and standardized staging models.          | dbt models with casting and renaming. |
+| **GOLD (Star)** | Business-ready Star Schema (Facts & Dimensions).  | `fct_payroll`, `dim_employee`.        |
+| **Analytics**   | One Big Table optimized for BI performance (OBT). | Denormalized view for Looker Studio.  |
 
 ---
 
@@ -35,19 +35,23 @@ We implement Staging Layer as Views to ensure "Late Binding." This allows for im
 
 ### 🔄 Dimensional Modeling (Gold):
 
-#### dim_calendar : Seed
-
-Unlike source-dependent dimensions, dim_calendar is managed as a dbt seed to ensure a continuous and enriched time-series reference, enabling accurate trend analysis regardless of gaps in the source payroll data.
-
-#### dim_employee dim_agency & dim_job_title : Table
+#### dim_calendar, dim_employee, dim_agency & dim_job_title : Table
 
 These are reference dimensions with low volatility. They are materialized as **Tables**, ensuring that any updates in agency naming or job classifications are fully refreshed during each run without the overhead of incremental logic.
 
-#### Fact Table : Incremental
+#### fct_payroll : Table
 
-- **fct_payroll (Incremental merge)**: ThIS table handle large volumes of event-based data. Using an **Incremental** strategy ensures we only process the latest payroll periods, drastically reducing BigQuery slot usage and processing costs.
+- Strategy: Full Refresh with Partitioning & Clustering
 
-### 🔄 Reporting Layer (BI):
+- Description: This table handles large volumes of payroll records. Instead of a basic incremental merge, we utilize BigQuery Native Partitioning by fiscal_year.
+
+- Why this choice? - Cost Efficiency: By partitioning on the fiscal year, BigQuery only scans the relevant data blocks when filtering by date, drastically reducing slot usage and query costs.
+
+- Performance: We apply Clustering on agency_key and job_title_key to speed up complex aggregations and joins within each partition.
+
+- Reliability: Since historical payroll data can occasionally be updated, a full refresh strategy (re-calculating the partition) ensures 100% data consistency without the complexity of incremental state management at this stage.
+
+### 🔄 Analytics Layer (BI):
 
 Instead of connecting Looker Studio directly to the Star Schema, We implemente the One Big Table (OBT) pattern:
 

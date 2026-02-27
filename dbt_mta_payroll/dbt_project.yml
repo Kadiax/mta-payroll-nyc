@@ -35,3 +35,6 @@ models:
     warehouse:
       +materialized: table
       +schema: gold
+    analytics:
+      +materialized: view
+      +schema: analytics

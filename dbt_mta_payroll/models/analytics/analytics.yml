@@ -1,0 +1,22 @@
+models:
+  - name: obt_payroll
+    description: "Final denormalized table for Looker Studio."
+    columns:
+      - name: payroll_key
+        tests:
+          - unique
+          - not_null
+
+      - name: agency_name
+        tests:
+          - not_null # Ensures no agency was "lost" in the join
+      - name: job_title
+        tests:
+          - not_null # Ensures no job title was "lost" in the join
+      - name: fiscal_year
+        tests:
+          - not_null # Ensures every record is associated with a fiscal year
+      - name: name_hash
+        tests:
+          - not_null # Ensures every payroll record is linked to an employee
+
