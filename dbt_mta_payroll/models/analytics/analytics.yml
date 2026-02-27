@@ -87,3 +87,35 @@ models:
       - name: employee_count
         tests:
           - not_null
+  - name: v_hr_dynamics
+    description: "Workforce tracking with data quality segmentation."
+    columns:
+      - name: fiscal_year
+        tests:
+          - not_null
+      - name: agency_name
+        tests:
+          - not_null
+      - name: event_type
+        tests:
+          - accepted_values:
+              values: ["Hire", "Separation"]
+
+  - name: v_payroll_composition
+    description: "Analysis of payroll structure (Base vs. Overtime vs. Extra)."
+    columns:
+      - name: pay_type
+        tests:
+          - not_null
+          - accepted_values:
+              values:
+                [
+                  "Base Salary",
+                  "Overtime",
+                  "Retroactive",
+                  "Cash Outs",
+                  "Other Pay",
+                ]
+      - name: total_amount
+        tests:
+          - not_null
