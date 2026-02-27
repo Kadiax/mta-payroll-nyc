@@ -24,6 +24,7 @@ joined as (
         stg.other_pay,
         stg.total_earnings,
         stg.record_updated_at,
+        stg.raw_ingested_at,
         
         -- foreign keys
         de.employee_key,
@@ -74,6 +75,7 @@ select
     
     -- Dates & Metadata
     record_updated_at,
+    raw_ingested_at,
     current_timestamp() as dbt_updated_at
 
 from joined

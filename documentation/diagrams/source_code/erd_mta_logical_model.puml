@@ -28,7 +28,6 @@ package "Payroll Process" {
          department_name 
          job_title
          pay_basis
-         employment_status
     }
     entity "dim_agency" as DA1 <<Dim>> {
         * agency_key 

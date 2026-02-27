@@ -35,7 +35,6 @@ select
     de.name_hash,
     de.start_date,
     de.separation_date,
-    de.employment_status,
     de.pay_basis,
     de.department_name,
 
@@ -56,7 +55,9 @@ select
     f.other_pay,
 
     -- 6. Metadata
-    current_timestamp() as obt_updated_at
+    f.record_updated_at,
+    f.raw_ingested_at,
+    current_timestamp() as dbt_updated_at
 
 from fact f
 left join dim_employee de on f.employee_key = de.employee_key

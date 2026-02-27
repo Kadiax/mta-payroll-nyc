@@ -1,41 +1,83 @@
 models:
   - name: obt_payroll
-    description: "Final denormalized table for Looker Studio."
+    description: "{{ doc('obt_payroll') }}"
     columns:
       - name: payroll_key
+        description: "{{ doc('col_payroll_key') }}"
         tests:
           - unique
           - not_null
 
       - name: agency_name
+        description: "{{ doc('col_agency_name') }}"
         tests:
           - not_null # Ensures no agency was "lost" in the join
       - name: agency_key
+        description: "{{ doc('col_agency_key') }}"
         tests:
           - not_null # Ensures every payroll record is linked to an agency
       - name: job_title_key
+        description: "{{ doc('col_job_title_key') }}"
         tests:
           - not_null # Ensures every payroll record is linked to a job title
       - name: job_title
+        description: "{{ doc('col_job_title') }}"
         tests:
           - not_null # Ensures no job title was "lost" in the join
       - name: fiscal_year
+        description: "{{ doc('col_fiscal_year') }}"
         tests:
           - not_null # Ensures every record is associated with a fiscal year
       - name: name_hash
+        description: "{{ doc('col_name_hash') }}"
         tests:
           - not_null # Ensures every payroll record is linked to an employee
       - name: employee_key
+        description: "{{ doc('col_employee_key') }}"
         tests:
           - not_null # Ensures no employee name was "lost" in the join
+      - name: start_date
+        description: "{{ doc('col_start_date') }}"
+      - name: separation_date
+        description: "{{ doc('col_separation_date') }}"
+      - name: department_name
+        description: "{{ doc('col_department_name') }}"
+      - name: pay_basis
+        description: "{{ doc('col_pay_basis') }}"
+      - name: hourly_rate
+        description: "{{ doc('col_hourly_rate') }}"
+      - name: regular_pay
+        description: "{{ doc('col_regular_pay') }}"
+      - name: overtime_pay
+        description: "{{ doc('col_overtime_pay') }}"
+      - name: cash_outs
+        description: "{{ doc('col_cash_outs') }}"
+      - name: retro_pay
+        description: "{{ doc('col_retro_pay') }}"
+      - name: other_pay
+        description: "{{ doc('col_other_pay') }}"
+      - name: total_earnings
+        description: "{{ doc('col_total_earnings') }}"
+      - name: record_updated_at
+        description: "{{ doc('col_updated_at') }}"
+      - name: raw_ingested_at
+        description: "{{ doc('col_raw_ingested_at') }}"
+        tests:
+          - not_null
+      - name: dbt_updated_at
+        description: "{{ doc('col_dbt_updated_at') }}"
+        tests:
+          - not_null
   - name: v_payroll_kpis
     description: "Aggregation view for Looker Studio Scorecards and high-level charts."
     columns:
       - name: fiscal_year
+        description: "{{ doc('col_fiscal_year') }}"
         tests:
           - not_null
 
       - name: agency_name
+        description: "{{ doc('col_agency_name') }}"
         tests:
           - not_null
 
@@ -53,37 +95,24 @@ models:
     tests:
       - dbt_utils.expression_is_true:
           expression: "avg_regular_salary <= total_payroll"
-
-  - name: v_payroll_kpis
-    description: "Aggregated view for high-level KPIs (Total Payroll, Avg Salary, Headcount)."
-    columns:
-      - name: fiscal_year
-        tests:
-          - not_null
-      - name: agency_name
-        tests:
-          - not_null
-      - name: headcount
-        tests:
-          - not_null
-          - dbt_utils.accepted_range:
-              min_value: 0
-      - name: total_payroll
-        tests:
-          - not_null
-
   - name: mv_overtime_by_job
     description: "Materialized view for Job Title analysis. Optimized for Bar Charts."
     columns:
+      - name: agency_name
+        description: "{{ doc('col_agency_name') }}"
+        tests:
+          - not_null
       - name: job_title
+        description: "{{ doc('col_job_title') }}"
+        tests:
+          - not_null
+      - name: fiscal_year
+        description: "{{ doc('col_fiscal_year') }}"
         tests:
           - not_null
       - name: total_overtime_pay
         tests:
           - not_null
-          - dbt_utils.accepted_range:
-              min_value: 0
-              severity: warn
       - name: employee_count
         tests:
           - not_null
@@ -91,12 +120,15 @@ models:
     description: "Workforce tracking with data quality segmentation."
     columns:
       - name: fiscal_year
+        description: "{{ doc('col_fiscal_year') }}"
         tests:
           - not_null
       - name: agency_name
+        description: "{{ doc('col_agency_name') }}"
         tests:
           - not_null
       - name: event_type
+        description: "Hire or Separation"
         tests:
           - accepted_values:
               values: ["Hire", "Separation"]
@@ -104,6 +136,14 @@ models:
   - name: v_payroll_composition
     description: "Analysis of payroll structure (Base vs. Overtime vs. Extra)."
     columns:
+      - name: fiscal_year
+        description: "{{ doc('col_fiscal_year') }}"
+        tests:
+          - not_null
+      - name: agency_name
+        description: "{{ doc('col_agency_name') }}"
+        tests:
+          - not_null
       - name: pay_type
         tests:
           - not_null

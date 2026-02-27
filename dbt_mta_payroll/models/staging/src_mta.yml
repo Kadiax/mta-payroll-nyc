@@ -8,36 +8,42 @@ sources:
         description: "Raw payroll data ingested from GCS into BigQuery (Bronze Layer)"
         columns:
           - name: Year
-            description: "Fiscal year of the payroll record."
+            description: "{{ doc('col_fiscal_year') }}"
           - name: name_hash
-            description: "Salted SHA-256 hash of the employee name (Anonymized)."
+            description: "{{ doc('col_name_hash') }}"
             tests:
               - not_null # Security: hashing is mandatory
           - name: Working_Agency
-            description: "MTA Agency name (e.g., NYCTA, MMNR)."
+            description: "{{ doc('col_agency_name') }}"
           - name: Start_Date
-            description: "Employee agency start date (MM/DD/YYYY)."
+            description: "{{ doc('col_start_date') }}"
           - name: Separation_Date
-            description: "Date the employee left the agency, if applicable."
+            description: "{{ doc('col_separation_date') }}"
           - name: Title
-            description: "Official job title description."
+            description: "{{ doc('col_job_title') }}"
           - name: Department
-            description: "Internal department code or name."
+            description: "{{ doc('col_department_name') }}"
           - name: Pay_Basis
-            description: "Frequency of pay (e.g., Biweekly, Hourly)."
+            description: "{{ doc('col_pay_basis') }}"
           - name: Hourly_Rate
-            description: "Hourly pay rate if applicable."
+            description: "{{ doc('col_hourly_rate') }}"
           - name: Regular_Pay
-            description: "Gross pay for regular working hours."
+            description: "{{ doc('col_regular_pay') }}"
           - name: Overtime_Pay
-            description: "Amount paid for overtime hours."
+            description: "{{ doc('col_overtime_pay') }}"
           - name: Cash_Outs
-            description: "Payouts for unused leave or other benefits."
+            description: "{{ doc('col_cash_outs') }}"
           - name: Retro_Pay
-            description: "Back-pay for previous periods."
+            description: "{{ doc('col_retro_pay') }}"
           - name: Other_Pay
-            description: "Miscellaneous additional compensation."
+            description: "{{ doc('col_other_pay') }}"
           - name: Total_Earnings
-            description: "Sum of all pay components for the period."
+            description: "{{ doc('col_total_earnings') }}"
           - name: Updated_At
-            description: "Timestamp when the record was last updated by source."
+            description: "{{ doc('col_updated_at') }}"
+          - name: raw_ingested_at
+            description: "{{ doc('col_raw_ingested_at') }}"
+          - name: source_file
+            description: "{{ doc('col_source_file') }}"
+            tests:
+              - not_null

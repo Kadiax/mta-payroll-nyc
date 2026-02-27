@@ -11,11 +11,7 @@ with employee_raw as (
         start_date,
         separation_date,
         department_name,
-        pay_basis,
-        case 
-            when start_date is null then 'INCOMPLETE/RETROACTIVE'
-            else 'ACTIVE/STANDARD'
-        end as employment_status,
+        pay_basis
     from {{ ref('stg_mta_payroll') }}
 )
 
@@ -36,7 +32,6 @@ select
     department_name,
     job_title,
     pay_basis,
-    employment_status,
     
     -- Audit metadata
     current_timestamp() as dbt_updated_at

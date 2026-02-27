@@ -1,5 +1,5 @@
 select
-  format_date('%F', d)  as id,
+  format_date('%F', d)  as calendar_key,
   d                     as full_date,
   extract(YEAR from d)  as year,
   extract(WEEK from d)  as year_week,
@@ -17,4 +17,4 @@ from (
   select
     *
   from
-    unnest(generate_date_array('2014-01-01', '2050-01-01', interval 1 day)) as d )
+    unnest(generate_date_array('2025-01-01', '2030-01-01', interval 1 day)) as d )

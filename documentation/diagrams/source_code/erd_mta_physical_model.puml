@@ -14,7 +14,6 @@ package "Payroll Process" {
          department_name : STRING
          job_title : STRING
          pay_basis : STRING
-         employment_status : STRING
          dbt_updated_at : TIMESTAMP
     }
     entity "dim_agency" as DA1 <<Dim>> {
@@ -58,6 +57,7 @@ package "Payroll Process" {
          other_pay : FLOAT64
          total_earnings : FLOAT64
          record_updated_at : DATE
+         raw_ingested_at : TIMESTAMP
          dbt_updated_at : TIMESTAMP
     }
 
