@@ -10,17 +10,22 @@ package "Payroll Process" {
          name_hash : STRING
          start_date : DATE
          separation_date : DATE
+         agency_name : STRING
          department_name : STRING
+         job_title : STRING
          pay_basis : STRING
          employment_status : STRING
+         dbt_updated_at : TIMESTAMP
     }
     entity "dim_agency" as DA1 <<Dim>> {
         * agency_key : INT64 [PK]
          agency_name : STRING
+         dbt_updated_at : TIMESTAMP
     }
     entity "dim_job_title" as DJT1 <<Dim>> {
         * job_title_key : INT64 [PK]
          job_title : STRING
+         dbt_updated_at : TIMESTAMP
     }
     entity "dim_calendar" as DC1 <<Dim>> {
         * id : STRING [PK]
@@ -34,7 +39,8 @@ package "Payroll Process" {
          month_name : STRING
          week_day : STRING
          day_name : STRING
-         day_is_weekday : INT64
+         day_is_weekday : INT64 
+         dbt_updated_at : TIMESTAMP
     }
 
 
@@ -52,6 +58,7 @@ package "Payroll Process" {
          other_pay : FLOAT64
          total_earnings : FLOAT64
          record_updated_at : DATE
+         dbt_updated_at : TIMESTAMP
     }
 
     FP }|--|| DE1

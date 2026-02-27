@@ -24,7 +24,9 @@ package "Payroll Process" {
          name_hash 
          start_date 
          separation_date 
+         agency_name
          department_name 
+         job_title
          pay_basis
          employment_status
     }

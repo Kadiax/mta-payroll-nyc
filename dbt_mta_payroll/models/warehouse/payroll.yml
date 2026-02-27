@@ -1,0 +1,121 @@
+models:
+  - name: dim_agency
+    description: "Referential table for MTA Agencies."
+    columns:
+      - name: agency_key
+        tests:
+          - unique
+          - not_null
+      - name: agency_name
+        description: "Official name of the agency (e.g., MTA Police, NYCT)."
+        tests:
+          - not_null
+      - name: dbt_updated_at
+        description: "Technical timestamp of the last dbt model execution."
+        tests:
+          - not_null
+  - name: dim_calendar
+    description: "Calendar dimension for date-based analysis."
+    columns:
+      - name: id
+        description: "Unique identifier for each date (format YYYY-MM-DD)"
+        tests:
+          - unique
+          - not_null
+
+      - name: fiscal_year
+        description: "Fiscal year for joining with the fact table."
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 2025
+              max_value: 2030
+      - name: day_is_weekday
+        description: "Indicator if the day is a weekday (1) or weekend (0)."
+        tests:
+          - dbt_expectations.expect_column_values_to_be_in_set:
+              arguments:
+                value_set: [0, 1]
+                quote_values: false
+      - name: dbt_updated_at
+        description: "Technical timestamp of the last dbt model execution."
+        tests:
+          - not_null
+
+  - name: dim_job_title
+    description: "Referential table for job titles, with a technical key and metadata for tracking updates."
+    columns:
+      - name: job_title_key
+        description: "Technical key for the job title, generated using farm_fingerprint for performance and determinism."
+        tests:
+          - unique
+          - not_null
+      - name: job_title
+        description: "Official job title in uppercase (e.g., POLICE OFFICER, BUS OPERATOR)."
+        tests:
+          - not_null
+      - name: dbt_updated_at
+        description: "Technical timestamp of the last dbt model execution."
+        tests:
+          - not_null
+  - name: dim_employee
+    description: "Unique dimension per employee, based on the combination of Name + Agency + Job Title + Start Date."
+    columns:
+      - name: employee_key
+        description: "Technical key for the employee, generated using farm_fingerprint on the combination of name_hash, agency_name, job_title, and start_date for performance and determinism."
+        tests:
+          - unique
+          - not_null
+      - name: name_hash
+        description: "Anonymized identifier for the employee from the source."
+        tests:
+          - not_null
+      - name: employment_status
+        description: "Calculated status based on presence of start date."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["ACTIVE/STANDARD", "INCOMPLETE/RETROACTIVE"]
+      - name: start_date
+        description: "Start date of the employee's contract. If null, it indicates an incomplete/retroactive record."
+      - name: dbt_updated_at
+        description: "Technical timestamp of the last dbt model execution."
+        tests:
+          - not_null
+  - name: fct_payroll
+    description: "Central fact table containing financial metrics of MTA payroll, with foreign keys to dimensions and business logic"
+    columns:
+      # --- PK ---
+      - name: payroll_key
+        tests:
+          - unique
+          - not_null
+
+      # --- FK ---
+      - name: employee_key
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_employee')
+              field: employee_key
+
+      - name: agency_key
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_agency')
+              field: agency_key
+
+      - name: job_title_key
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_job_title')
+              field: job_title_key
+
+      - name: fiscal_year
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_calendar')
+              field: fiscal_year
