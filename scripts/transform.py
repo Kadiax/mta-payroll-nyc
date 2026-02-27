@@ -14,7 +14,7 @@ def execute_dbt_build(working_dir: str) -> bool:
     logger.info("Starting dbt build...")
     try:
         process = subprocess.Popen(
-            ["dbt", "build"],
+            ["dbt", "build", "--full-refresh"],
             cwd=working_dir,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
