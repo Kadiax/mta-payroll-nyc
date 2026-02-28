@@ -82,7 +82,10 @@ models:
           - not_null
 
       - name: headcount
-        description: "Should always be a positive number."
+        description: >
+          This metric reflects employees currently receiving payroll. 
+          It does not account for separations or inactive staff who are no longer 
+          on the payroll cycle for 2025.
         tests:
           - not_null
           - dbt_utils.accepted_range:
