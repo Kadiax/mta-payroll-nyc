@@ -7,10 +7,7 @@ select
     -- KPI 2: Total Payroll 
     sum(total_earnings) as total_payroll,
     
-    -- KPI 3: Avg Salary 
-    avg(regular_pay) as avg_regular_salary,
-    
-    -- KPI 4: Overtime Pay
+    -- KPI 3: Overtime Pay
     sum(overtime_pay) as total_overtime,
     
     count(*) as total_records

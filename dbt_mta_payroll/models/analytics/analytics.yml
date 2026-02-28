@@ -94,10 +94,13 @@ models:
       - name: total_payroll
         tests:
           - not_null
-    # Custom test to ensure the average salary is not higher than total payroll (basic sanity check)
-    tests:
-      - dbt_utils.expression_is_true:
-          expression: "avg_regular_salary <= total_payroll"
+          - dbt_utils.accepted_range:
+              min_value: 0
+      - name: total_overtime
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
   - name: mv_overtime_by_job
     description: "Materialized view for Job Title analysis. Optimized for Bar Charts."
     columns:

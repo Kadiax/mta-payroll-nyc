@@ -27,7 +27,7 @@ package "Silver (Staging)" {
 
 package "Gold (Star Schema)" {
     folder "Dimensions (References)" #F9F9F9 {
-        rectangle "dim_employee [TABLE]" <<GoldDim>> as G_DE
+        rectangle "dim_employee [INC]" <<GoldDim>> as G_DE
         rectangle "dim_calendar [TABLE]" <<GoldDim>> as G_DC
         rectangle "dim_agency [TABLE]" <<GoldDim>> as G_DA
         rectangle "dim_job_title [TABLE]" <<GoldDim>> as G_DJ

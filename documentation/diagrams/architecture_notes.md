@@ -35,7 +35,19 @@ We implement Staging Layer as Views to ensure "Late Binding." This allows for im
 
 ### 🔄 Dimensional Modeling (Gold):
 
-#### dim_calendar, dim_employee, dim_agency & dim_job_title : Table
+#### dim_employee : Incremental (Merge)
+
+To handle multi-year data ingestion (2025-2026) while maintaining data integrity, this model is materialized as Incremental using a Merge strategy on BigQuery.
+
+- Deduplication Logic: Implements a window function (ROW_NUMBER) to ensure only the "freshest" record per employee is kept.
+
+- Priority Ranking: The logic prioritizes records with explicit separation_date and uses raw_ingested_at as a tie-breaker to guarantee the most recent version of a contract is persisted.
+
+- Performance Optimization: Uses is_incremental() filtering to process only new data since the last run, significantly reducing BigQuery scan costs and execution time.
+
+- Clustering: Data is clustered by agency_name and job_title to optimize downstream query performance in the BI layer.
+
+#### dim_calendar, dim_agency & dim_job_title : Table
 
 These are reference dimensions with low volatility. They are materialized as **Tables**, ensuring that any updates in agency naming or job classifications are fully refreshed during each run without the overhead of incremental logic.
 
