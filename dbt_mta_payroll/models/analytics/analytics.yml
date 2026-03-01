@@ -141,6 +141,10 @@ models:
         description: "{{ doc('col_agency_name') }}"
         tests:
           - not_null
+      - name: job_title
+        description: "{{ doc('col_job_title') }}"
+        tests:
+          - not_null
       - name: event_type
         description: "Hire or Separation"
         tests:

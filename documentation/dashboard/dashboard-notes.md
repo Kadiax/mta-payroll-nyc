@@ -53,3 +53,37 @@ To ensure transparency and accuracy, this project relies on official New York St
 - **Primary Dataset**: [MTA Employee Payroll (Beginning 2025)](https://catalog.data.gov/dataset/mta-employee-payroll-beginning-2025) via Data.gov.
 - **Agency Definitions**: Descriptions and organizational structure are sourced from the [Official MTA Agency Overview](https://www.mta.info/agency).
 - **Legal Mandate**: Public disclosure of this payroll data is governed by the [New York State Public Authorities Law § 2800](https://www.nysenate.gov/legislation/laws/PBA/2800), ensuring public oversight of authority operations.
+
+# 📊 Business Insights - MTA Payroll Analysis (2025)
+
+This document summarizes key performance indicators (KPIs) and operational anomalies detected via the data pipeline.
+
+---
+
+### 1. Budget Overview
+
+- **Total Payroll Volume**: The MTA managed over **$4.02 billion** in total payroll in 2025 for approximately 78,300 employees.
+- **Overtime Weight**: Overtime costs amounted to **$685.49 million**, representing a significant portion of the total budget, particularly concentrated in a few key agencies.
+
+### 2. Agencies OT Analysis
+
+- **Cost Concentration**: The **NYCTA** dominates spending with nearly **$400 million** in overtime, followed by the **LIR**.
+- **Ratio Alert**: Although the NYCTA has the highest volume, some agencies have more concerning OT ratios relative to their regular payroll, signaling a structural dependence on overtime like the BTA or the LIR.
+
+### 3. Job Focus: The Case of the Third Railman (Job Titles)
+
+- **Critical Job**: The position of Third Railman (LIR) has an extreme overtime ratio, accounting for nearly 40% of total compensation.
+- **Operational Risk**: Such a high level of overtime in a high-voltage maintenance job suggests either a shortage of skilled labor or an increased risk of fatigue for track safety.
+
+### 4. HR Dynamics and Retention
+
+- **Recruitment Leader**: The **NYCTA** is experiencing exceptional growth, with a net gain of more than **1,000 employees** (1,184 hires vs. 155 separations).
+- **Agency Stability**: Most agencies, including the **LIR** and **BTA**, show a positive balance in 2025, recruiting significantly more than they lose in staff.
+- **Persistence of Overtime**: Despite these waves of massive recruitment, overtime is not decreasing proportionally. This indicates that the need for labor in specialized positions (maintenance, electricity) is not yet being met by general recruitment.
+
+### 5. Recruitment Mismatch (Job Titles Mobility)
+
+- **The Job Paradox**: Granular analysis reveals that recruitment efforts are not targeting positions in crisis.
+- **Lack of Technical Recruitment**: While **Third Railmen** and **Signal Inspectors** are breaking overtime records, **no recruitment** was recorded for these positions in 2025.
+- **Inefficient Allocation**: The LIR has prioritized recruiting profiles such as **Assistant Conductors** (34) and **Car Appearance Maint** (32), leaving maintenance technicians chronically understaffed.
+- **Conclusion**: The **inability to hire for critical technical jobs** that keeps overtime at record levels in LIR and BTA Agencies.
