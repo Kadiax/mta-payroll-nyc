@@ -9,6 +9,9 @@ select
     
     -- KPI 3: Overtime Pay
     sum(overtime_pay) as total_overtime,
+
+    -- KPI 4: Regular Pay
+    sum(regular_pay) as total_regular_pay,
     
     count(*) as total_records
 from {{ ref('obt_payroll') }}

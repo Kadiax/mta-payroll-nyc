@@ -101,6 +101,11 @@ models:
           - not_null
           - dbt_utils.accepted_range:
               min_value: 0
+      - name: total_regular_pay
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
   - name: mv_overtime_by_job
     description: "Materialized view for Job Title analysis. Optimized for Bar Charts."
     columns:
@@ -117,6 +122,9 @@ models:
         tests:
           - not_null
       - name: total_overtime_pay
+        tests:
+          - not_null
+      - name: total_regular_pay
         tests:
           - not_null
       - name: employee_count
