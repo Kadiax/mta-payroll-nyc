@@ -18,12 +18,12 @@ This project implements a public sector payroll analytics platform using a moder
 
 The pipeline follows the Medallion architecture to ensure data quality and traceability:
 
-| Layer           | Description                                      | Implementation                        |
-| :-------------- | :----------------------------------------------- | :------------------------------------ |
-| **BRONZE**      | Raw, immutable data landed from GCS.             | External tables or `bq load`.         |
-| **SILVER**      | Cleaned and standardized staging models.         | dbt models with casting and renaming. |
-| **GOLD (Star)** | Business-ready Star Schema (Facts & Dimensions). | `fct_payroll`, `dim_employee`.        |
-| **OBT**         | One Big Table optimized for BI performance.      | Denormalized view for Looker Studio.  |
+| Layer           | Description                                       | Implementation                        |
+| :-------------- | :------------------------------------------------ | :------------------------------------ |
+| **BRONZE**      | Raw, immutable data landed from GCS.              | External tables or `bq load`.         |
+| **SILVER**      | Cleaned and standardized staging models.          | dbt models with casting and renaming. |
+| **GOLD (Star)** | Business-ready Star Schema (Facts & Dimensions).  | `fct_payroll`, `dim_employee`.        |
+| **Analytics**   | One Big Table optimized for BI performance (OBT). | Denormalized view for Looker Studio.  |
 
 ---
 
@@ -35,28 +35,35 @@ We implement Staging Layer as Views to ensure "Late Binding." This allows for im
 
 ### 🔄 Dimensional Modeling (Gold):
 
-#### dim_employee : Slowly Changing Dimensions (SCD)
+#### dim_employee : Incremental (Merge)
 
-We implement **SCD Type 2** on `dim_employee` to track historical changes (e.g., department transfers). This is managed via dbt snapshots:
+To handle multi-year data ingestion (2025-2026) while maintaining data integrity, this model is materialized as Incremental using a Merge strategy on BigQuery.
 
-- `dbt_valid_from`: Start of the record's validity.
-- `dbt_valid_to`: End of the record's validity (null if current).
+- Deduplication Logic: Implements a window function (ROW_NUMBER) to ensure only the "freshest" record per employee is kept.
 
-#### dim_calendar : Seed
+- Priority Ranking: The logic prioritizes records with explicit separation_date and uses raw_ingested_at as a tie-breaker to guarantee the most recent version of a contract is persisted.
 
-Unlike source-dependent dimensions, dim_calendar is managed as a dbt seed to ensure a continuous and enriched time-series reference, enabling accurate trend analysis regardless of gaps in the source payroll data.
+- Performance Optimization: Uses is_incremental() filtering to process only new data since the last run, significantly reducing BigQuery scan costs and execution time.
 
-#### dim_agency & dim_job_title : Table
+- Clustering: Data is clustered by agency_name and job_title to optimize downstream query performance in the BI layer.
+
+#### dim_calendar, dim_agency & dim_job_title : Table
 
 These are reference dimensions with low volatility. They are materialized as **Tables**, ensuring that any updates in agency naming or job classifications are fully refreshed during each run without the overhead of incremental logic.
 
-#### Fact Tables : Incremental vs. Table
+#### fct_payroll : Table
 
-- **fct_payroll & fct_employment_events (Incremental)**: These tables handle large volumes of event-based data. Using an **Incremental** strategy ensures we only process the latest payroll periods, drastically reducing BigQuery slot usage and processing costs.
+- Strategy: Full Refresh with Partitioning & Clustering
 
-- **fct_agency_stats (Table)**: To ensure aggregate consistency across historical periods, this summary table is fully refreshed. This prevents data drift when historical payroll records are updated or backfilled.
+- Description: This table handles large volumes of payroll records. Instead of a basic incremental merge, we utilize BigQuery Native Partitioning by fiscal_year.
 
-### 🔄 Reporting Layer (OBT):
+- Why this choice? - Cost Efficiency: By partitioning on the fiscal year, BigQuery only scans the relevant data blocks when filtering by date, drastically reducing slot usage and query costs.
+
+- Performance: We apply Clustering on agency_key and job_title_key to speed up complex aggregations and joins within each partition.
+
+- Reliability: Since historical payroll data can occasionally be updated, a full refresh strategy (re-calculating the partition) ensures 100% data consistency without the complexity of incremental state management at this stage.
+
+### 🔄 Analytics Layer (BI):
 
 Instead of connecting Looker Studio directly to the Star Schema, We implemente the One Big Table (OBT) pattern:
 

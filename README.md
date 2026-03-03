@@ -1,22 +1,102 @@
-# MTA PAYROLL NYC
+# 🗽 MTA Payroll & Workforce Analytics (2025)
 
-## Google Cloud SDK Shell OAUTH
+## 📌 Project Overview
 
-- gcloud config set project mta-payroll-nyc
-- gcloud config list
-- gcloud auth application-default login
+This Data Engineering project transforms raw, fragmented Open Data from the New York State into a strategic Decision Support System. By processing over **$4.02 Billion in payroll records**, the pipeline identifies critical operational risks, such as the correlation between specialized staff shortages and the **$685M+ Overtime (OT) expenditure**.
 
-## Power shell
+## 🏗 Architecture & Tech Stack
 
-- Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
-- .\venv\Scripts\activate
+- **Ingestion (Python/Docker)**: Automated extraction from New York Open Data with schema enforcement.
+- **Data Lake (GCS)**: Bronze layer storing raw CSV files for lineage and replayability.
+- **Warehouse (BigQuery)**: Serverless compute for large-scale analytical queries.
+- **Transformation (dbt)**:
+  - **Incremental Modeling**: Optimized processing using `is_incremental()` to reduce costs.
+  - **Deduplication**: Implementing `row_number()` window functions to ensure "Golden Records" for each employee.
+  - **Idempotency**: Using deterministic hashing (`farm_fingerprint`) for surrogate keys and PII anonymization.
+- **BI & Viz (Looker Studio)**: Interactive dashboarding for deep-dive analysis.
+- **Orchestration (Makefile/Docker)**: The entire pipeline is containerized to ensure that the code runs the same way locally as it does on a Compute Engine or Cloud Run instance.
 
-## Packages installation
+## 🔐 Data Governance & Security
 
-- pip install -r requirements.txt
-- cd dbt_mta_payroll_nyc
-- dbt deps
+PII Anonymization: Employee names are hashed using a deterministic Salt (farm_fingerprint) to ensure privacy while maintaining joinability between datasets.
 
-## GDPR Compliance
+Medallion Architecture: Data is organized into Bronze (Raw), Silver (Standardized), and Gold (Star Schema) layers.
 
-To ensure data privacy, this pipeline implements PII Redaction. Employee names are never stored in the Cloud. A pseudonymization process using SHA-256 hashing is performed locally during the extraction phase to create a unique name_hash while maintaining data utility for analytical purposes.
+## 📈 Business Insights & Case Study
+
+This pipeline goes beyond reporting by highlighting the "Conductor Paradox":
+
+- High Turnover: In 2025, the LIR recruited 34 Assistant Conductors but lost 30 senior Conductors.
+
+- Financial Impact: This near-zero net gain fails to mitigate the $17.5M+ OT bill for these specific roles.
+
+- Technical Impasse: Maintenance roles like Gang Foreman ME saw 16 departures and 0 hires, forcing a structural reliance on massive overtime.
+
+## 📁 Documentation & Resources
+
+To bridge the gap between technical engineering and business strategy, additional resources are available in the documentation/ folder:
+
+### 📊 Analytical Reports
+
+- **Dashboard Notes (MD)**: Detailed technical notes on KPI definitions.
+
+- **Dashboard PDF**: A static export of the Looker Studio dashboard for offline review :
+
+_Click the image below to view the full PDF report._
+
+<a href="documentation/dashboard/MTA-PAYROLL-NYC.pdf">
+  <img src="documentation/diagrams/07_dashboard_thumbnail.png" width="800" alt="MTA Payroll 2025 Dashboard Miniature">
+</a>
+
+### 🏗️ Architecture & Data Models
+
+Deep dive into the data engineering foundations of the project:
+
+- **Architecture Notes (MD)**: Comprehensive documentation on the technical implementation.
+
+- **Data Flow Diagram**: Visual mapping of the Python -> GCS -> BigQuery -> dbt pipeline.
+
+![MTA Data Flow](documentation/diagrams/02_mta_dataflow.png)
+
+- Entity Relationship Diagrams (ERD):
+  - **Conceptual Model**
+
+  - **Logical Model**
+
+  - **Physical Model**
+
+- **dbt Materialization Strategy**: Visual guide to the incremental and table materialization logic.
+
+- **Bus Matrix**: Mapping of business processes to dimensional attributes.
+
+## 🛠 Automation with Makefile and Docker : Getting Started (Reproducibility)
+
+The entire lifecycle is orchestrated via a `Makefile` to ensure reproducibility across environments.
+
+### 1. Prerequisites
+
+Before running the pipeline, ensure you have the following installed:
+
+- **Google Cloud SDK**: To authenticate with BigQuery and GCS.
+- **Docker**: To run the containerized ETL and dbt environment.
+- **GNU Make**: To orchestrate the pipeline commands.
+
+#### 📥 How to install Make:
+
+- **Windows**: Install via [Choco](https://chocolatey.org/) (`choco install make`) or [Scoop](https://scoop.sh/) (`scoop install make`).
+- **MacOS**: Already included with Xcode Command Line Tools (`xcode-select --install`) or via [Homebrew](https://brew.sh/) (`brew install make`).
+- **Linux**: Usually pre-installed. If not, use `sudo apt install build-essential` (Ubuntu/Debian) or `sudo dnf install make` (Fedora).
+
+### 2. Setup & Authentication
+
+```bash
+# Authenticate with Google Cloud
+gcloud auth application-default login
+
+cp config.yaml.example config.yaml
+cp dbt_mta_payroll/profiles.yml.example dbt_mta_payroll/profiles.yml
+cp scripts/schemas/mta_payroll_schema.json.example scripts/schemas/mta_payroll_schema.json
+
+# Run full pipeline (Build -> Test -> Ingest -> Transform)
+make all
+```

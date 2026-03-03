@@ -5,11 +5,11 @@ models:
     description: "Staging model for MTA payroll data. Data is cleaned, casted, and trimmed."
     columns:
       - name: name_hash
-        description: "Anonymized hash of the employee name."
+        description: "{{ doc('col_name_hash') }}"
         tests:
           - not_null
       - name: fiscal_year
-        description: "Fiscal year of the payroll record."
+        description: "{{ doc('col_fiscal_year') }}"
         tests:
           - not_null
           # Adjusted for 5 years of potential reporting
@@ -19,12 +19,27 @@ models:
                 quote_values: false
 
       - name: agency_name
-        description: "MTA Agency name (cleaned via TRIM)."
+        description: "{{ doc('col_agency_name') }}"
         tests:
           - not_null
-
+      - name: start_date
+        description: "{{ doc('col_start_date') }}"
+      - name: separation_date
+        description: "{{ doc('col_separation_date') }}"
+      - name: job_title
+        description: "{{ doc('col_job_title') }}"
+        tests:
+          - not_null
+      - name: department_name
+        description: "{{ doc('col_department_name') }}"
+        tests:
+          - not_null
+      - name: pay_basis
+        description: "{{ doc('col_pay_basis') }}"
+        tests:
+          - not_null
       - name: total_earnings
-        description: "Total earnings for the period. Validates against extreme outliers."
+        description: "{{ doc('col_total_earnings') }}"
         tests:
           - not_null
           - dbt_expectations.expect_column_values_to_be_between:
@@ -33,32 +48,46 @@ models:
                 max_value: 1000000.0
                 row_condition: "total_earnings is not null"
 
-      - name: job_title
-        description: "Official job title (cleaned via TRIM). Defaults to 'Unknown' if missing."
+      - name: hourly_rate
+        description: "{{ doc('col_hourly_rate') }}"
         tests:
           - not_null
-
-      - name: department_name
-        description: "Department name (cleaned via TRIM). Defaults to 'Unknown' if missing."
+      - name: regular_pay
+        description: "{{ doc('col_regular_pay') }}"
         tests:
           - not_null
-
-      - name: pay_basis
-        description: "Frequency of pay (cleaned via TRIM). Defaults to 'Unknown' if missing."
+      - name: overtime_pay
+        description: "{{ doc('col_overtime_pay') }}"
+        tests:
+          - not_null
+      - name: cash_outs
+        description: "{{ doc('col_cash_outs') }}"
+        tests:
+          - not_null
+      - name: retro_pay
+        description: "{{ doc('col_retro_pay') }}"
+        tests:
+          - not_null
+      - name: other_pay
+        description: "{{ doc('col_other_pay') }}"
+        tests:
+          - not_null
+      - name: record_updated_at
+        description: "{{ doc('col_updated_at') }}"
         tests:
           - not_null
 
       - name: source_file
-        description: "Name of the source file from which the record was ingested."
+        description: "{{ doc('col_source_file') }}"
         tests:
           - not_null
 
       - name: raw_ingested_at
-        description: "Timestamp when the record was ingested into the raw layer."
+        description: "{{ doc('col_raw_ingested_at') }}"
         tests:
           - not_null
 
       - name: stg_processed_at
-        description: "Timestamp when the record was processed in the staging layer."
+        description: "{{ doc('col_stg_processed_at') }}"
         tests:
           - not_null

@@ -103,7 +103,7 @@ def reconcile_load_integrity(storage_client, bq_client, cfg, table_id):
 def run_load_pipeline(cfg, bq_client, storage_client):
     """Orchestrates the identification and loading of new GCS files."""
     # 1. Prepare Identifiers
-    dataset_id = cfg.datasets[0] 
+    dataset_id = cfg.gcp.datasets[0] 
     full_table_id = f"{cfg.gcp.project_id}.{dataset_id}.{cfg.source.raw_table_name}"
     temp_table_id = f"{full_table_id}_temp"
 

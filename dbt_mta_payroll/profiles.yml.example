@@ -1,0 +1,21 @@
+# dbt Profile Configuration for BigQuery
+# Use this template to create your own profiles.yml in ~/.dbt/
+dbt_mta_payroll:
+  outputs:
+    dev:
+      type: bigquery
+      method: oauth
+      project: "your-gcp-project-id" # The ID of your Google Cloud Project
+      dataset: "silver"             # Default dataset for development
+      
+      # Location must match your BigQuery dataset region (e.g., europe-west9)
+      location: "europe-west9" 
+      
+      threads: 1
+      priority: interactive
+      
+      # Execution settings
+      job_execution_timeout_seconds: 300
+      job_retries: 1
+      
+  target: dev

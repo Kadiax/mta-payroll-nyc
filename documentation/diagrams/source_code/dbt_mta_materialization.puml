@@ -27,28 +27,24 @@ package "Silver (Staging)" {
 
 package "Gold (Star Schema)" {
     folder "Dimensions (References)" #F9F9F9 {
-        rectangle "dim_employee [SCD2]" <<GoldDim>> as G_DE
-        rectangle "dim_calendar [SEED]" <<GoldDim>> as G_DC
+        rectangle "dim_employee [INC]" <<GoldDim>> as G_DE
+        rectangle "dim_calendar [TABLE]" <<GoldDim>> as G_DC
         rectangle "dim_agency [TABLE]" <<GoldDim>> as G_DA
         rectangle "dim_job_title [TABLE]" <<GoldDim>> as G_DJ
     }
     
     folder "Facts (Events)" #FFFDE7 {
-        rectangle "fct_payroll [INC]" <<GoldFact>> as G_FP
-        rectangle "fct_employment_events [INC]" <<GoldFact>> as G_FEE
-        rectangle "fct_agency_stats [TABLE]" <<GoldFact>> as G_FAS
+        rectangle "fct_payroll [TABLE]" <<GoldFact>> as G_FP
     }
 }
 
-package "Consumption (Reporting)" {
-    rectangle "OBT Reporting Layer\n(Authorized Views)" <<Reporting>> as R_OBT
+package "BI (Reporting)" {
+    rectangle "obt_payroll\n(Authorized Views)" <<Reporting>> as R_OBT
 }
 
 ' --- Dependencies (Lineage) ---
 B1 --> S1
 S1 --> G_FP
-S1 --> G_FEE
-S1 --> G_FAS
 S1 --> G_DE
 S1 --> G_DA
 S1 --> G_DJ
@@ -58,9 +54,7 @@ G_DE --> R_OBT
 G_DC --> R_OBT
 G_DA --> R_OBT
 G_DJ --> R_OBT
-G_FEE --> R_OBT
 G_FP --> R_OBT
-G_FAS --> R_OBT
 
 R_OBT --> [Looker Studio]
 @enduml

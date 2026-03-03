@@ -1,0 +1,164 @@
+models:
+  - name: dim_agency
+    description: "{{ doc('dim_agency') }}"
+    columns:
+      - name: agency_key
+        description: "{{ doc('col_agency_key') }}"
+        tests:
+          - unique
+          - not_null
+      - name: agency_name
+        description: "{{ doc('col_agency_name') }}"
+        tests:
+          - not_null
+      - name: dbt_updated_at
+        description: "{{ doc('col_dbt_updated_at') }}"
+        tests:
+          - not_null
+  - name: dim_calendar
+    description: "{{ doc('dim_calendar') }}"
+    columns:
+      - name: calendar_key
+        description: "{{ doc('col_calenday_key') }}"
+        tests:
+          - unique
+          - not_null
+
+      - name: fiscal_year
+        description: "{{ doc('col_fiscal_year') }}"
+        tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_in_set:
+              arguments:
+                value_set: [2025, 2026, 2027, 2028, 2029, 2030]
+                quote_values: false
+      - name: day_is_weekday
+        description: "{{ doc('col_day_is_weekday') }}"
+        tests:
+          - dbt_expectations.expect_column_values_to_be_in_set:
+              arguments:
+                value_set: [0, 1]
+                quote_values: false
+      - name: dbt_updated_at
+        description: "{{ doc('col_dbt_updated_at') }}"
+        tests:
+          - not_null
+
+  - name: dim_job_title
+    description: "{{ doc('dim_job_title') }}"
+    columns:
+      - name: job_title_key
+        description: "{{ doc('col_job_title_key') }}"
+        tests:
+          - unique
+          - not_null
+      - name: job_title
+        description: "{{ doc('col_job_title') }}"
+        tests:
+          - not_null
+      - name: dbt_updated_at
+        description: "{{ doc('col_dbt_updated_at') }}"
+        tests:
+          - not_null
+  - name: dim_employee
+    description: "{{ doc('dim_employee') }}"
+    columns:
+      - name: employee_key
+        description: "{{ doc('col_employee_key') }}"
+        tests:
+          - unique
+          - not_null
+      - name: name_hash
+        description: "{{ doc('col_name_hash') }}"
+        tests:
+          - not_null
+      - name: start_date
+        description: "{{ doc('col_start_date') }}"
+      - name: separation_date
+        description: "{{ doc('col_separation_date') }}"
+      - name: agency_name
+        description: "{{ doc('col_agency_name') }}"
+        tests:
+          - not_null
+      - name: department_name
+        description: "{{ doc('col_department_name') }}"
+        tests:
+          - not_null
+      - name: job_title
+        description: "{{ doc('col_job_title') }}"
+        tests:
+          - not_null
+      - name: pay_basis
+        description: "{{ doc('col_pay_basis') }}"
+        tests:
+          - not_null
+      - name: dbt_updated_at
+        description: "{{ doc('col_dbt_updated_at') }}"
+        tests:
+          - not_null
+  - name: fct_payroll
+    description: "{{ doc('fct_payroll') }}"
+    columns:
+      # --- PK ---
+      - name: payroll_key
+        description: "{{ doc('col_payroll_key') }}"
+        tests:
+          - unique
+          - not_null
+
+      # --- FK ---
+      - name: employee_key
+        description: "Foreign key to dim_employee"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_employee')
+              field: employee_key
+
+      - name: agency_key
+        description: "Foreign key to dim_agency"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_agency')
+              field: agency_key
+
+      - name: job_title_key
+        description: "Foreign key to dim_job_title"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_job_title')
+              field: job_title_key
+
+      - name: fiscal_year
+        description: "Fiscal year for the payroll record, used for time-based analysis and joining with dim_calendar."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_calendar')
+              field: fiscal_year
+      - name: hourly_rate
+        description: "{{ doc('col_hourly_rate') }}"
+      - name: regular_pay
+        description: "{{ doc('col_regular_pay') }}"
+      - name: overtime_pay
+        description: "{{ doc('col_overtime_pay') }}"
+      - name: cash_outs
+        description: "{{ doc('col_cash_outs') }}"
+      - name: retro_pay
+        description: "{{ doc('col_retro_pay') }}"
+      - name: other_pay
+        description: "{{ doc('col_other_pay') }}"
+      - name: total_earnings
+        description: "{{ doc('col_total_earnings') }}"
+      - name: record_updated_at
+        description: "{{ doc('col_updated_at') }}"
+      - name: raw_ingested_at
+        description: "{{ doc('col_raw_ingested_at') }}"
+        tests:
+          - not_null
+      - name: dbt_updated_at
+        description: "{{ doc('col_dbt_updated_at') }}"
+        tests:
+          - not_null

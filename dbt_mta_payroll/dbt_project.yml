@@ -32,3 +32,9 @@ models:
     staging:
       +materialized: view
       +schema: silver
+    warehouse:
+      +materialized: table
+      +schema: gold
+    analytics:
+      +materialized: view
+      +schema: analytics
