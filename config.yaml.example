@@ -1,0 +1,27 @@
+# GCP Configuration
+gcp:
+  project_id: "your-gcp-project-id" # The ID of your Google Cloud Project
+  location: "europe-west9"         # Preferred region (e.g., US or Europe)
+  bucket_name: "your-gcs-bucket-name"
+  gcs_log_folder: "scripts/logs/"
+  dbt_project_dir: "dbt_mta_payroll"
+  
+  # Layered architecture (Medallion)
+  datasets:
+    - "bronze"    # Raw ingestion layer
+    - "silver"    # Cleaned & Standardized layer
+    - "gold"      # Star schema & Dimensions/Facts
+    - "analytics" # Reporting & Looker Studio views
+
+# Source & Ingestion Configuration
+source:
+  # Official NY State Open Data URL (MTA Payroll)
+  url: "https://data.ny.gov/api/views/kcjb-nf3e/rows.csv?accessType=DOWNLOAD"
+  raw_prefix: "csv/raw/"
+  
+  # SECURITY: Salt used for farm_fingerprint/hashing sensitive PII (Employee Names)
+  # Replace this with a strong random string in your local config.yml
+  salt: "REPLACE_WITH_YOUR_SECRET_SALT_FOR_ANONYMIZATION"
+  
+  raw_table_name: "raw_mta_payroll"
+  raw_schema_name: "mta_payroll_schema.json"

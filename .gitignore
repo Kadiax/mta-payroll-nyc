@@ -30,21 +30,21 @@ dbt_packages/
 logs/
 target/
 profiles.yml
-# Note: On ignore le profiles.yml car il contient souvent tes accès locaux
+# Note: We ignore profiles.yml because it often contains your local access details.
 
-# --- Google Cloud & Sécurité ---
-# Très important : ne jamais commit tes clés JSON
+# --- Google Cloud & Security ---
+# Very important: never commit your JSON keys
 *.json
 !composer*.json # Sauf si c'est un fichier de config PHP spécifique
 .gcloud/
 .gsutil/
 
-# --- Variables d'environnement & Secrets ---
+# --- Environment Variables & Secrets ---
 .env
 .env.local
 .env.*.local
 config.yaml
-# Si ton config.yaml contient des IDs de projet réels, il est parfois préférable de ne commit qu'un config.example.yaml
+# If your config.yaml contains real project IDs, it is sometimes preferable to only commit a config.example.yaml
 
 # --- IDE & OS ---
 .vscode/
