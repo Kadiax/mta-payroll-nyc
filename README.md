@@ -4,6 +4,16 @@
 
 This Data Engineering project transforms raw, fragmented Open Data from the New York State into a strategic Decision Support System. By processing over **$4.02 Billion in payroll records**, the pipeline identifies critical operational risks, such as the correlation between specialized staff shortages and the **$685M+ Overtime (OT) expenditure**.
 
+## 📊 Dataset Technical Specifications
+
+- Data Source: New York State Open Data - Data.gov.
+
+- Volume: 78,309 records (~11.8 MB raw CSV).
+
+- Temporal Scope: Comprehensive payroll data for the fiscal year 2025.
+
+- Data Integrity: Automated PII protection via Salted Hashing (SHA-256) during the ingestion phase with Python/Pandas.
+
 ## 🏗 Architecture & Tech Stack
 
 - **Ingestion (Python/Docker)**: Automated extraction from New York Open Data with schema enforcement.
@@ -100,3 +110,27 @@ cp scripts/schemas/mta_payroll_schema.json.example scripts/schemas/mta_payroll_s
 # Run full pipeline (Build -> Test -> Ingest -> Transform)
 make all
 ```
+
+## 🚀 Roadmap & Future Evolutions
+
+### 🏗️ Pipeline & Orchestration
+
+- Orchestration Upgrade: Transition from Makefile to a Python-native orchestrator like Airflow or Dagster to manage complex task dependencies and retries.
+
+- Advanced Observability: Integrate tools like Elementary or Monte Carlo to monitor pipeline health and schema changes in real-time.
+
+- CI/CD Integration: Implement GitHub Actions to automate python tests, dbt test and dbt run on every Pull Request to ensure production stability.
+
+### 💎 Data Quality & Governance
+
+- Multi-Source Validation: Integrate New York City Budget data to perform cross-source reconciliation and validate the accuracy of payroll disbursements.
+
+- Enhanced Missing Data Handling: Refine the name_hash logic to distinguish between "Confirmed Unknown" and "Missing at Source" for better analytical precision.
+
+- Data Contract Implementation: Define YAML-based data contracts to ensure that upstream source changes don't break downstream BigQuery models.
+
+### 📈 Analytical Enrichment
+
+- New Dimensions: Enrich the Star Schema with a dim_weather (rain, snow, storm etc) and dim_geography (Agencies' physical locations) to analyze spatial-temporal overtime trends.
+
+- FinOps Dashboarding: Add a tracking layer in BigQuery to monitor query costs and optimize partitioning/clustering strategies for better cost-efficiency.

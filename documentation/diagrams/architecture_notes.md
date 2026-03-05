@@ -2,6 +2,16 @@
 
 This project implements a public sector payroll analytics platform using a modern ELT architecture on Google Cloud Platform. It demonstrates a full-scale data engineering pipeline from raw ingestion to BI consumption.
 
+## 📊 Dataset Technical Specifications
+
+- Data Source: New York State Open Data - Data.gov.
+
+- Volume: 78,309 records (~11.8 MB raw CSV).
+
+- Temporal Scope: Comprehensive payroll data for the fiscal year 2025.
+
+- Data Integrity: Automated PII protection via Salted Hashing (SHA-256) during the ingestion phase with Python/Pandas.
+
 ## 🏗️ High-Level Architecture
 
 ## 🛠️ Technology Stack
