@@ -2,7 +2,7 @@
 
 ## 📌 Project Overview
 
-This Data Engineering project transforms raw, fragmented Open Data from the New York State into a strategic Decision Support System. By processing over **$4.02 Billion in payroll records**, the pipeline identifies critical operational risks, such as the correlation between specialized staff shortages and the **$685M+ Overtime (OT) expenditure**.
+This Data Engineering project transforms raw, fragmented Open Data from the New York State into a strategic Decision Support System. By processing over **$4.02 Billion in payroll records**, the pipeline identifies critical operational risks, such as the correlation between specialized staff shortages and the **$685M+ Overtime expenditure**.
 
 ## 📊 Dataset Technical Specifications
 
@@ -38,7 +38,7 @@ This pipeline goes beyond reporting by highlighting the "Conductor Paradox":
 
 - High Turnover: In 2025, the LIR recruited 34 Assistant Conductors but lost 30 senior Conductors.
 
-- Financial Impact: This near-zero net gain fails to mitigate the $17.5M+ OT bill for these specific roles.
+- Financial Impact: This near-zero net gain fails to mitigate the $17.5M+ Overtime bill for these specific roles.
 
 - Technical Impasse: Maintenance roles like Gang Foreman ME saw 16 departures and 0 hires, forcing a structural reliance on massive overtime.
 

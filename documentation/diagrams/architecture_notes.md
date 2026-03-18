@@ -87,8 +87,9 @@ Instead of connecting Looker Studio directly to the Star Schema, We implemente t
 
 ### 🔐 Security & Privacy
 
-- **Hashing**: Sensitive identifying information is masked using SHA-256 (`name_hash`).
-- **Access Control**: Looker Studio's service account is granted access only to the reporting dataset.
+- **Data Privacy**: Applied Salted Hashing (SHA-256) on PII (Personally Identifiable Information) such as employee names to ensure data anonymity.
+- **GDPR Compliance**: Designed the pipeline to follow GDPR principles (data minimization and storage limitation) by only processing and storing fields strictly necessary for payroll analysis.
+- **Access Management**: Implemented Google ADC (Application Default Credentials) to handle authentication securely, eliminating the need to store or hardcode sensitive JSON key files within the repository.
 
 ### 🛠️ Data Quality
 

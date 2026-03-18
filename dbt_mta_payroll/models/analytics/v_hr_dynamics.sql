@@ -11,9 +11,9 @@ with hr_events_unpivoted as (
         employee_key,
         'Hire' as event_type
     from {{ ref('obt_payroll') }}
-    where 
+    where start_date is not null 
         -- We ensure that the start date took place during the relevant fiscal year.
-        extract(year from start_date) = fiscal_year 
+        and extract(year from start_date) = fiscal_year 
 
     union all
 
