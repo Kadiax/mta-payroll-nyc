@@ -90,6 +90,7 @@ Instead of connecting Looker Studio directly to the Star Schema, We implemente t
 - **Data Privacy**: Applied Salted Hashing (SHA-256) on PII (Personally Identifiable Information) such as employee names to ensure data anonymity.
 - **GDPR Compliance**: Designed the pipeline to follow GDPR principles (data minimization and storage limitation) by only processing and storing fields strictly necessary for payroll analysis.
 - **Access Management**: Implemented Google ADC (Application Default Credentials) to handle authentication securely, eliminating the need to store or hardcode sensitive JSON key files within the repository.
+- **Scalable Architecture**: Leveraged a Medallion Architecture (Bronze/Silver/Gold) to transform raw, messy records into a clean, analytics-ready Star Schema.
 
 ### 🛠️ Data Quality
 

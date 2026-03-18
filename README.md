@@ -28,9 +28,11 @@ This Data Engineering project transforms raw, fragmented Open Data from the New 
 
 ## 🔐 Data Governance & Security
 
-PII Anonymization: Employee names are hashed using a deterministic Salt (farm_fingerprint) to ensure privacy while maintaining joinability between datasets.
+- **Security-First Design**: Implemented Salted SHA-256 Hashing on PII and eliminated hardcoded keys via Google ADC to ensure production-grade data privacy.
 
-Medallion Architecture: Data is organized into Bronze (Raw), Silver (Standardized), and Gold (Star Schema) layers.
+- **Regulatory Alignment**: Built with GDPR-compliant logic, focusing on data minimization and strict storage limitation for sensitive payroll fields.
+
+- **Scalable Architecture**: Leveraged a Medallion Architecture (Bronze/Silver/Gold) to transform raw, messy records into a clean, analytics-ready Star Schema.
 
 ## 📈 Business Insights & Case Study
 
@@ -40,13 +42,17 @@ Medallion Architecture: Data is organized into Bronze (Raw), Silver (Standardize
 
 - Restructuring Lag: The deficit is worsened by the "Lift & Shift" transfers to MTA Headquarters and Civil Service delays, shifting costs from salaries to emergency overtime.
 
+[(Read the Full Business Case Study here)](documentation/dashboard/2_business-insights.md)
+
 ## 📁 Documentation & Resources
 
 To bridge the gap between technical engineering and business strategy, additional resources are available in the documentation/ folder:
 
 ### 📊 Analytical Reports
 
-- **Dashboard Notes (MD)**: Detailed technical notes on KPI definitions.
+- **Dashboard Notes (MD)**: Detailed technical notes on KPI definitions. [(click here)](documentation/dashboard/1_dashboard-notes.md)
+
+- **Business Insights (MD)**: This section provides a deep-dive "Data Story" into the MTA’s current staffing crisis, correlating dashboard trends with official state audits. [(click here)](documentation/dashboard/2_business-insights.md)
 
 - **Dashboard PDF**: A static export of the Looker Studio dashboard for offline review :
 
@@ -74,6 +80,8 @@ Deep dive into the data engineering foundations of the project:
   - **Physical Model**
 
 - **dbt Materialization Strategy**: Visual guide to the incremental and table materialization logic.
+
+  ![DBT strategy](documentation/diagrams/06_dbt_mta_materialization.png)
 
 - **Bus Matrix**: Mapping of business processes to dimensional attributes.
 
