@@ -34,13 +34,11 @@ Medallion Architecture: Data is organized into Bronze (Raw), Silver (Standardize
 
 ## 📈 Business Insights & Case Study
 
-This pipeline goes beyond reporting by highlighting the "Conductor Paradox":
+- Operational deficit: Critical roles like BTO and Gang Foreman face a severe "hemorrhage" (50+ departures vs. 0 hires), creating dangerous staffing gaps.
 
-- High Turnover: In 2025, the LIR recruited 34 Assistant Conductors but lost 30 senior Conductors.
+- Overtime Trap: This lack of recruitment forces a structural reliance on overtime, which now accounts for nearly 30% to 50% of total pay for frontline staff.
 
-- Financial Impact: This near-zero net gain fails to mitigate the $17.5M+ Overtime bill for these specific roles.
-
-- Technical Impasse: Maintenance roles like Gang Foreman ME saw 16 departures and 0 hires, forcing a structural reliance on massive overtime.
+- Restructuring Lag: The deficit is worsened by the "Lift & Shift" transfers to MTA Headquarters and Civil Service delays, shifting costs from salaries to emergency overtime.
 
 ## 📁 Documentation & Resources
 
