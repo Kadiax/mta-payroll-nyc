@@ -158,6 +158,24 @@ resource "google_project_iam_member" "deploy_sa_storage_admin" {
   member  = "serviceAccount:${google_service_account.deploy_sa.email}"
 }
 
+# Needed for infra/workflows.tf (PR4): deploy SA manages the
+# google_workflows_workflow and google_cloud_scheduler_job resources via
+# CI's terraform job. Missed in the original PR1 bootstrap — only added
+# once CI's terraform job actually hit a 403 (workflows.workflows.get)
+# trying to read the Workflow created locally under personal credentials,
+# which have broader rights and masked the gap during local testing.
+resource "google_project_iam_member" "deploy_sa_workflows_editor" {
+  project = var.project_id
+  role    = "roles/workflows.editor"
+  member  = "serviceAccount:${google_service_account.deploy_sa.email}"
+}
+
+resource "google_project_iam_member" "deploy_sa_cloudscheduler_admin" {
+  project = var.project_id
+  role    = "roles/cloudscheduler.admin"
+  member  = "serviceAccount:${google_service_account.deploy_sa.email}"
+}
+
 # Access to the state bucket — REQUIRED regardless of what the pipeline
 # deploys, otherwise `terraform init` fails in CI with a 403 on
 # storage.objects.list. Frequently forgotten.
