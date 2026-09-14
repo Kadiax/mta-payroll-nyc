@@ -1,0 +1,140 @@
+name: "CI/CD Pipeline"
+
+on:
+  push:
+    branches: ["main"]
+  # Lets this run manually on any branch to validate the workflow before
+  # merging (push: branches: ["main"] alone never fires on a PR branch).
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: "write"
+
+# All non-secret config comes from this repo's GitHub Actions repository
+# variables (Settings -> Secrets and variables -> Actions -> Variables),
+# set via .github/gh-repo-vars.sh.
+env:
+  PROJECT_ID: ${{ vars.PROJECT_ID }}
+  REGION: ${{ vars.REGION }}
+  GAR_NAME: ${{ vars.GAR_NAME }}
+  WIF_PROVIDER: ${{ vars.WIF_PROVIDER }}
+  WIF_SERVICE_ACCOUNT: ${{ vars.WIF_SERVICE_ACCOUNT }} # deploy SA
+  RUNTIME_SA_CREATE_DATASETS: ${{ vars.RUNTIME_SA_CREATE_DATASETS }}
+  RUNTIME_SA_EXTRACT: ${{ vars.RUNTIME_SA_EXTRACT }}
+  RUNTIME_SA_LOAD: ${{ vars.RUNTIME_SA_LOAD }}
+  RUNTIME_SA_TRANSFORM: ${{ vars.RUNTIME_SA_TRANSFORM }}
+
+jobs:
+  # Job 1 — Infra: Artifact Registry repo + data-lake bucket + bucket IAM
+  terraform:
+    name: "Terraform"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra
+    # terraform.tfvars is gitignored on purpose, so a fresh CI checkout
+    # never has it — TF_VAR_* env vars supply the same values instead.
+    env:
+      TF_VAR_project_id: ${{ vars.PROJECT_ID }}
+      TF_VAR_region: ${{ vars.REGION }}
+      TF_VAR_repository_id: ${{ vars.GAR_NAME }}
+      TF_VAR_repository_description: ${{ vars.REPOSITORY_DESCRIPTION }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - id: auth
+        uses: google-github-actions/auth@v2.0.0
+        with:
+          workload_identity_provider: ${{ env.WIF_PROVIDER }}
+          service_account: ${{ env.WIF_SERVICE_ACCOUNT }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Format
+        run: terraform fmt -check
+
+      - name: Terraform Plan
+        run: terraform plan -input=false
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve -input=false
+
+  # Job 2 — Deploy: build one image, push it, deploy the 4 Cloud Run Jobs.
+  # Runs only after "terraform" succeeds (the AR repo must exist first).
+  deploy:
+    name: "Build and Deploy"
+    needs: terraform
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Repeated in THIS job: each job runs on a fresh runner, no session
+      # is shared between jobs.
+      - id: auth
+        uses: google-github-actions/auth@v2.0.0
+        with:
+          workload_identity_provider: ${{ env.WIF_PROVIDER }}
+          service_account: ${{ env.WIF_SERVICE_ACCOUNT }}
+
+      - name: Setup Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Docker Auth
+        run: gcloud auth configure-docker "${{ env.REGION }}-docker.pkg.dev" --quiet
+
+      - name: Build and Push Container
+        run: |-
+          IMAGE="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.GAR_NAME }}/mta-pipeline:${{ github.sha }}"
+          docker build -t "$IMAGE" .
+          docker push "$IMAGE"
+
+      # Cloud Run Jobs: no dedicated deploy-cloudrun GitHub Action for
+      # Jobs — use gcloud directly. One image, 4 Jobs, each with its own
+      # entrypoint (--command/--args), name, and dedicated runtime SA
+      # (never the deploy SA — see setup/'s IAM matrix in PROGRESS.md).
+      - name: Deploy Cloud Run Jobs
+        run: |-
+          IMAGE="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.GAR_NAME }}/mta-pipeline:${{ github.sha }}"
+
+          gcloud run jobs deploy mta-create-datasets \
+            --image="$IMAGE" \
+            --region="${{ env.REGION }}" \
+            --service-account="${{ env.RUNTIME_SA_CREATE_DATASETS }}" \
+            --command=python \
+            --args="-m,scripts.create_datasets" \
+            --quiet
+
+          gcloud run jobs deploy mta-extract \
+            --image="$IMAGE" \
+            --region="${{ env.REGION }}" \
+            --service-account="${{ env.RUNTIME_SA_EXTRACT }}" \
+            --command=python \
+            --args="-m,scripts.extract_and_anonymize" \
+            --quiet
+
+          gcloud run jobs deploy mta-load \
+            --image="$IMAGE" \
+            --region="${{ env.REGION }}" \
+            --service-account="${{ env.RUNTIME_SA_LOAD }}" \
+            --command=python \
+            --args="-m,scripts.load_to_bq" \
+            --quiet
+
+          gcloud run jobs deploy mta-transform \
+            --image="$IMAGE" \
+            --region="${{ env.REGION }}" \
+            --service-account="${{ env.RUNTIME_SA_TRANSFORM }}" \
+            --command=python \
+            --args="-m,scripts.transform" \
+            --task-timeout=1800 \
+            --quiet
+
+      # No public-access step needed — Cloud Run Jobs aren't HTTP-triggered,
+      # no IAM invoker concept applies (unlike Cloud Run Services).
