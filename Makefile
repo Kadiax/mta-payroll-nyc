@@ -28,8 +28,12 @@ create-datasets:
 	docker run --rm -v "$(GCLOUD_CONFIG_LOCAL):/root/.config/gcloud" -e GOOGLE_APPLICATION_CREDENTIALS=$(ADC_INTERNAL) $(IMAGE_NAME) python -m scripts.create_datasets
 
 # Run extraction and anonymization
+# PII_SALT must be exported in your shell first (never committed — see
+# config.yaml). It must stay the SAME value across every run, local or CI:
+# name_hash is deterministic (salt + name), and employee dedup (dim_employee)
+# relies on it staying stable over time.
 extract:
-	docker run --rm -v "$(GCLOUD_CONFIG_LOCAL):/root/.config/gcloud" -e GOOGLE_APPLICATION_CREDENTIALS=$(ADC_INTERNAL) $(IMAGE_NAME) python -m scripts.extract_and_anonymize
+	docker run --rm -v "$(GCLOUD_CONFIG_LOCAL):/root/.config/gcloud" -e GOOGLE_APPLICATION_CREDENTIALS=$(ADC_INTERNAL) -e PII_SALT=$(PII_SALT) $(IMAGE_NAME) python -m scripts.extract_and_anonymize
 
 # Run BigQuery loading
 load:
