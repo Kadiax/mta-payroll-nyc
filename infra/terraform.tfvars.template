@@ -1,0 +1,13 @@
+# infra/terraform.tfvars.template
+#
+# Committed trace of the shape of terraform.tfvars — the real file (with
+# actual values) stays strictly local, never committed (see .gitignore).
+#
+# To actually deploy: copy this to infra/terraform.tfvars (untracked) and
+# replace every XXX. Auto-loaded by Terraform, no -var-file flag needed.
+
+project_id = "XXX"
+region     = "XXX"
+
+repository_id          = "XXX"
+repository_description = "XXX"
