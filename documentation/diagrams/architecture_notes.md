@@ -20,18 +20,22 @@ flowchart TD
 
     subgraph CICD["⚙️ CI/CD — GitHub Actions (Workload Identity Federation, no JSON keys)"]
         direction LR
-        TF["Terraform<br/>provisions infra"] --> DPL["Build & Deploy<br/>Docker image"]
+        TF["Terraform job"] --> DPL["Build & Deploy job"]
     end
 
-    DPL -->|push| AR[("Artifact Registry")]
-    DPL -.->|deploys| J1
+    TF -.->|provisions| AR[("Artifact Registry")]
+    TF -.->|provisions| WF["🔀 Cloud Workflows<br/>fails fast, no custom retry logic"]
+    TF -.->|provisions| SCH["⏰ Cloud Scheduler<br/>monthly cron"]
+
+    DPL -->|push image| AR
+    DPL -.->|deploys| J1 & J2 & J3 & J4
 
     subgraph RUN["☁️ Cloud Run Jobs — one dedicated least-privilege service account each"]
         direction LR
         J1["1️⃣ create-datasets"] --> J2["2️⃣ extract<br/>+ hash PII"] --> J3["3️⃣ load"] --> J4["4️⃣ transform<br/>dbt build"]
     end
 
-    SCH["⏰ Cloud Scheduler<br/>monthly cron"] --> WF["🔀 Cloud Workflows<br/>fails fast, no custom retry logic"]
+    SCH --> WF
     WF ==>|orchestrates| J1
 
     J4 --> BQ[("BigQuery<br/>Bronze → Silver → Gold → Analytics")]
