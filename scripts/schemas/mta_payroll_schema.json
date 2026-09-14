@@ -1,0 +1,98 @@
+[
+  {
+    "name": "Year",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Fiscal year of the payroll record"
+  },
+  {
+    "name": "name_hash",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "Salted SHA-256 hash of the employee name (Anonymized)"
+  },
+  {
+    "name": "Working_Agency",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "MTA Agency name (e.g., NYCTA, MMNR)"
+  },
+  {
+    "name": "Start_Date",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Employee agency start date (MM/DD/YYYY)"
+  },
+  {
+    "name": "Separation_Date",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Date the employee left the agency, if applicable"
+  },
+  {
+    "name": "Title",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Official job title description"
+  },
+  {
+    "name": "Department",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Internal department code or name"
+  },
+  {
+    "name": "Pay_Basis",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Frequency of pay (e.g., Biweekly, Hourly)"
+  },
+  {
+    "name": "Hourly_Rate",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Hourly pay rate if applicable"
+  },
+  {
+    "name": "Regular_Pay",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Gross pay for regular working hours"
+  },
+  {
+    "name": "Overtime_Pay",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Amount paid for overtime hours"
+  },
+  {
+    "name": "Cash_Outs",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Payouts for unused leave or other benefits"
+  },
+  {
+    "name": "Retro_Pay",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Back-pay for previous periods"
+  },
+  {
+    "name": "Other_Pay",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Miscellaneous additional compensation"
+  },
+  {
+    "name": "Total_Earnings",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Sum of all pay components for the period"
+  },
+  {
+    "name": "Updated_At",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "Timestamp when the record was last updated by source"
+  }
+]

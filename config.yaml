@@ -1,0 +1,21 @@
+gcp:
+  project_id: "mta-payroll-nyc"
+  location: "europe-west9" # Paris / France
+  bucket_name: "mta-payroll-nyc"
+  gcs_log_folder: "scripts/logs/"
+  dbt_project_dir: "dbt_mta_payroll"
+  datasets:
+    - "bronze"
+    - "silver"
+    - "gold"
+    - "analytics"
+source:
+  url: "https://data.ny.gov/api/views/kcjb-nf3e/rows.csv?accessType=DOWNLOAD"
+  raw_prefix: "csv/raw/"
+  # Never a real value here — this file is committed. The real salt is
+  # supplied via the PII_SALT environment variable (utils/config.py reads
+  # it with priority over this field), sourced from a GitHub Actions
+  # secret in CI or a local-only export for local runs.
+  salt: "SET_VIA_PII_SALT_ENV_VAR"
+  raw_table_name: "raw_mta_payroll"
+  raw_schema_name: "mta_payroll_schema.json"

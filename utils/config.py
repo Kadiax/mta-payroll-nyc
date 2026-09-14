@@ -1,3 +1,4 @@
+import os
 import yaml
 import logging
 from pathlib import Path
@@ -63,7 +64,16 @@ class Config(BaseConfig):
         
         with open(config_path, "r") as f:
             config_dict = yaml.safe_load(f)
-        
+
+        # PII_SALT env var takes priority over the YAML value — config.yaml
+        # is committed (no secrets), the real salt is injected at runtime
+        # (GitHub Actions secret in CI, local-only export otherwise).
+        pii_salt = os.environ.get("PII_SALT")
+        if pii_salt:
+            config_dict.setdefault("source", {})["salt"] = pii_salt
+            if logger:
+                logger.info("Overriding source.salt with the PII_SALT environment variable")
+
         # Pydantic valide tout ici : les types, le contenu et l'immuabilité (frozen)
         config = cls(**config_dict)
         
