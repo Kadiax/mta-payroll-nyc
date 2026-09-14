@@ -14,38 +14,7 @@ This project implements a public sector payroll analytics platform using a moder
 
 ## 🏗️ High-Level Architecture
 
-```mermaid
-flowchart TD
-    Dev(["👨‍💻 git push /<br/>workflow_dispatch"]) --> CICD
-
-    subgraph CICD["⚙️ CI/CD — GitHub Actions (Workload Identity Federation, no JSON keys)"]
-        direction LR
-        TF["Terraform<br/>provisions infra"] --> DPL["Build & Deploy<br/>Docker image"]
-    end
-
-    DPL -->|push| AR[("Artifact Registry")]
-    DPL -.->|deploys| J1
-
-    subgraph RUN["☁️ Cloud Run Jobs — one dedicated least-privilege service account each"]
-        direction LR
-        J1["1️⃣ create-datasets"] --> J2["2️⃣ extract<br/>+ hash PII"] --> J3["3️⃣ load"] --> J4["4️⃣ transform<br/>dbt build"]
-    end
-
-    SCH["⏰ Cloud Scheduler<br/>monthly cron"] --> WF["🔀 Cloud Workflows<br/>fails fast, no custom retry logic"]
-    WF ==>|orchestrates| J1
-
-    J4 --> BQ[("BigQuery<br/>Bronze → Silver → Gold → Analytics")]
-    BQ --> Looker(["📊 Looker Studio Dashboard"])
-
-    classDef ci fill:#24292e,stroke:#000,color:#fff
-    classDef gcp fill:#4285F4,stroke:#1a56db,color:#fff
-    classDef data fill:#34A853,stroke:#1e7e34,color:#fff
-    classDef bi fill:#EA4335,stroke:#b31412,color:#fff
-    class TF,DPL ci
-    class AR,J1,J2,J3,J4,SCH,WF gcp
-    class BQ data
-    class Looker bi
-```
+See the "🏛️ Architecture Diagram" section in the [root README](../../README.md) for the full CI/CD → orchestration → data → BI diagram — kept in one place only (GitHub Markdown has no include/transclusion mechanism, so a single canonical copy is more maintainable than syncing two).
 
 ## 🛠️ Technology Stack
 
