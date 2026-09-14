@@ -1,0 +1,17 @@
+# setup/terraform.tfvars.template
+#
+# Committed trace of the shape of terraform.tfvars — the real file (with
+# actual values) stays strictly local, never committed (see .gitignore).
+#
+# To actually bootstrap: copy this to setup/terraform.tfvars (untracked)
+# and replace every XXX with the real value. Auto-loaded by Terraform, no
+# -var-file flag needed.
+
+project_id = "XXX"
+region     = "XXX"
+zone       = "XXX"
+
+github_repo         = "XXX"
+pool_id             = "XXX"
+service_account_id  = "XXX"
+tfstate_bucket_name = "XXX"
