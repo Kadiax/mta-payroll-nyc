@@ -37,12 +37,17 @@ flowchart TD
         TF["Terraform job"] --> DPL["Build & Deploy job"]
     end
 
-    TF -.->|provisions| AR[("Artifact Registry")]
-    TF -.->|provisions| WF["🔀 Cloud Workflows<br/>fails fast, no custom retry logic"]
-    TF -.->|provisions| SCH["⏰ Cloud Scheduler<br/>monthly cron"]
+    TF -->|provisions| INFRA
 
-    DPL -->|push image| AR
-    DPL -.->|deploys| J1 & J2 & J3 & J4
+    subgraph INFRA["Provisioned by Terraform"]
+        direction LR
+        AR[("Artifact Registry")]
+        WF["🔀 Cloud Workflows"]
+        SCH["⏰ Cloud Scheduler<br/>monthly cron"]
+    end
+
+    DPL -->|push| AR
+    DPL -.->|deploys| J1
 
     subgraph RUN["☁️ Cloud Run Jobs — one dedicated least-privilege service account each"]
         direction LR
