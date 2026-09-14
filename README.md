@@ -20,7 +20,7 @@ This Data Engineering project transforms raw, fragmented Open Data from the New 
 - **Data Lake (GCS)**: Bronze layer storing raw CSV files for lineage and replayability.
 - **Warehouse (BigQuery)**: Serverless compute for large-scale analytical queries.
 - **Transformation (dbt)**:
-  - **Incremental Modeling**: Optimized processing using `is_incremental()` to reduce costs.
+  - **Incremental Modeling**: `dim_employee` is coded with `is_incremental()` filtering, ready to process only new data — though the pipeline currently always runs `dbt build --full-refresh`, so this cost-saving mode isn't active by default today (see Architecture Notes for details).
   - **Deduplication**: Implementing `row_number()` window functions to ensure "Golden Records" for each employee.
   - **Idempotency**: Using deterministic hashing (`farm_fingerprint`) for surrogate keys and PII anonymization.
 - **BI & Viz (Looker Studio)**: Interactive dashboarding for deep-dive analysis.

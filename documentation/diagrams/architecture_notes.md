@@ -101,7 +101,7 @@ To handle multi-year data ingestion (2025-2026) while maintaining data integrity
 
 - Priority Ranking: The logic prioritizes records with explicit separation_date and uses raw_ingested_at as a tie-breaker to guarantee the most recent version of a contract is persisted.
 
-- Performance Optimization: Uses is_incremental() filtering to process only new data since the last run, significantly reducing BigQuery scan costs and execution time.
+- Performance Optimization: The model is coded to use `is_incremental()` filtering, processing only new data since the last run. **Not currently realized in this pipeline**, though: `scripts/transform.py` (and therefore every local `make transform` and every production `mta-transform` Cloud Run Job execution) always invokes `dbt build --full-refresh`, which forces every model — `dim_employee` included — to rebuild from scratch on every single run. The incremental logic is real and ready to use, but only takes effect if the pipeline is ever run as plain `dbt build` (no `--full-refresh`) instead.
 
 - Clustering: Data is clustered by agency_name and job_title to optimize downstream query performance in the BI layer.
 
