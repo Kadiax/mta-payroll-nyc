@@ -30,8 +30,7 @@ class GCPConfig(BaseConfig):
 class SourceConfig(BaseConfig):
     url: str
     raw_prefix: str
-    salt: str
-    raw_table_name: str  
+    raw_table_name: str
     raw_schema_name: str
 
     @field_validator("url")
@@ -63,7 +62,7 @@ class Config(BaseConfig):
         
         with open(config_path, "r") as f:
             config_dict = yaml.safe_load(f)
-        
+
         # Pydantic valide tout ici : les types, le contenu et l'immuabilité (frozen)
         config = cls(**config_dict)
         

@@ -3,5 +3,6 @@ target/
 dbt_packages/
 logs/
 .user.yml
-profiles.yml
+# profiles.yml is committed on purpose (PR2, see repo-root .gitignore): it
+# uses method "oauth" (Application Default Credentials), no secrets inside.
 package-lock.yml

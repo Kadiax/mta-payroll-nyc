@@ -1,0 +1,16 @@
+gcp:
+  project_id: "mta-payroll-nyc"
+  location: "europe-west9" # Paris / France
+  bucket_name: "mta-payroll-nyc"
+  gcs_log_folder: "scripts/logs/"
+  dbt_project_dir: "dbt_mta_payroll"
+  datasets:
+    - "bronze"
+    - "silver"
+    - "gold"
+    - "analytics"
+source:
+  url: "https://data.ny.gov/api/views/kcjb-nf3e/rows.csv?accessType=DOWNLOAD"
+  raw_prefix: "csv/raw/"
+  raw_table_name: "raw_mta_payroll"
+  raw_schema_name: "mta_payroll_schema.json"

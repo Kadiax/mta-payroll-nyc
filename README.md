@@ -12,7 +12,7 @@ This Data Engineering project transforms raw, fragmented Open Data from the New 
 
 - Temporal Scope: Comprehensive payroll data for the fiscal year 2025.
 
-- Data Integrity: Automated PII protection via Salted Hashing (SHA-256) during the ingestion phase with Python/Pandas.
+- Data Integrity: Automated PII protection via SHA-256 hashing during the ingestion phase with Python/Pandas.
 
 ## 🏗 Architecture & Tech Stack
 
@@ -28,7 +28,7 @@ This Data Engineering project transforms raw, fragmented Open Data from the New 
 
 ## 🔐 Data Governance & Security
 
-- **Security-First Design**: Implemented Salted SHA-256 Hashing on PII and eliminated hardcoded keys via Google ADC to ensure production-grade data privacy.
+- **Security-First Design**: Implemented SHA-256 hashing on PII and eliminated hardcoded keys via Google ADC to ensure production-grade data privacy. The source dataset is New York State Open Data (already public, real names included), so hashing here protects against casual re-identification in the downstream dashboard rather than a determined adversary — no secret salt is used or needed.
 
 - **Regulatory Alignment**: Built with GDPR-compliant logic, focusing on data minimization and strict storage limitation for sensitive payroll fields.
 

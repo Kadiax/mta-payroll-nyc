@@ -19,11 +19,11 @@ def handle_missing_names(df: pd.DataFrame) -> pd.DataFrame:
     df['Name'] = df['Name'].fillna("UNKNOWN_EMPLOYEE").str.strip()
     return df
 
-def hash_string(value: str, salt: str) -> str:
-    """Atomic function to hash a single string with a salt."""
-    return hashlib.sha256(f"{value}{salt}".encode()).hexdigest()[:16]
+def hash_string(value: str) -> str:
+    """Atomic function to hash a single string."""
+    return hashlib.sha256(value.encode()).hexdigest()[:16]
 
-def anonymize_data(df: pd.DataFrame, salt: str) -> pd.DataFrame:
+def anonymize_data(df: pd.DataFrame) -> pd.DataFrame:
     """
     Orchestrates the anonymization process by replacing names with their hash.
     """
@@ -36,7 +36,7 @@ def anonymize_data(df: pd.DataFrame, salt: str) -> pd.DataFrame:
 
     # 2. Transform (We overwrite the ‘Name’ column directly)
     logger.info("Anonymizing names in-place...")
-    df['Name'] = df['Name'].apply(lambda x: hash_string(x, salt))
+    df['Name'] = df['Name'].apply(hash_string)
 
     # 3. Finalize (We rename it here for clarity in dbt)
     return df.rename(columns={'Name': 'name_hash'})
@@ -72,7 +72,7 @@ def main():
         raw_df = download_mta_data(cfg.source.url)
         
         # 3. Transform (Anonymize)
-        clean_df = anonymize_data(raw_df, cfg.source.salt) 
+        clean_df = anonymize_data(raw_df)
         
         # 4. Load
         upload_to_gcs(clean_df, cfg.gcp.bucket_name, cfg.source.raw_prefix, storage_client)

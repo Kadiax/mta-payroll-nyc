@@ -29,13 +29,16 @@ __pycache__/
 dbt_packages/
 logs/
 target/
-profiles.yml
-# Note: We ignore profiles.yml because it often contains your local access details.
+# dbt_mta_payroll/profiles.yml is committed on purpose (PR2): method "oauth"
+# relies on Application Default Credentials (the attached runtime SA on
+# Cloud Run, or `gcloud auth application-default login` locally) — no
+# credentials of any kind live in this file.
 
 # --- Google Cloud & Security ---
 # Very important: never commit your JSON keys
 *.json
-!composer*.json # Sauf si c'est un fichier de config PHP spécifique
+# Sauf si c'est un fichier de config PHP spécifique
+!composer*.json
 .gcloud/
 .gsutil/
 
@@ -43,8 +46,9 @@ profiles.yml
 .env
 .env.local
 .env.*.local
-config.yaml
-# If your config.yaml contains real project IDs, it is sometimes preferable to only commit a config.example.yaml
+# config.yaml is committed on purpose (PR2): project_id/bucket/region aren't
+# secrets. The one sensitive field (source.salt) is never written to this
+# file — it's read from the PII_SALT environment variable instead.
 
 # --- IDE & OS ---
 .vscode/
@@ -114,6 +118,12 @@ terraform.rc
 *.json
 !package.json
 !package-lock.json
+# BigQuery column schema, not a credential (PR2) — must be re-negated here
+# (a "!pattern # comment" on one line is NOT a comment in .gitignore, the
+# trailing text becomes part of the pattern and silently never matches —
+# hence the comment on its own line above, and repeating the negation here
+# since this later *.json block would otherwise re-ignore the earlier one)
+!scripts/schemas/mta_payroll_schema.json
 *service-account*.json
 *credentials*.json
 gcp-key.json
