@@ -11,7 +11,32 @@ renamed_and_cast AS (
 
         -- 2. Cleaned Strings (TRIM to remove extra spaces, COALESCE to handle nulls)
         TRIM(CAST(name_hash AS STRING)) AS name_hash,
-        UPPER(TRIM(COALESCE(CAST(Working_Agency AS STRING), 'UNKNOWN'))) AS agency_name,
+
+        -- Agency code normalization: the source uses inconsistent codes for the
+        -- SAME agency across fiscal years (confirmed on real data — 2025 vs 2026
+        -- had 9 vs 13 distinct agency_name values, several near-duplicates).
+        -- Without this, dim_agency splits one real agency into two rows, and
+        -- dim_employee's dedup key (which includes agency_name) fragments the
+        -- same employee's history across fiscal years too.
+        --   LIRR -> LIR: same agency (Long Island Rail Road), inconsistent spelling
+        --   SIR -> SIRTOA: same legal entity — FTA/NTD lists it as "Staten Island
+        --     Rapid Transit Operating Authority, dba: MTA Staten Island Railway
+        --     (SIRTOA)"; SIR is just the dba/operating name
+        -- NOT merged (insufficient evidence, deliberately left as-is):
+        --   MTA BUS vs MTB BUS — looked like a typo, but MTA.info's own docs
+        --     reference a distinct "MTB 5303" exam code, suggesting MTB may be
+        --     a real internal designation, not an error. Needs a firmer source
+        --     before merging.
+        --   MTA-P vs MTA POLICE — both coexist within fiscal_year 2026 with
+        --     comparable row counts (2,610 vs 2,656); if this were just
+        --     inconsistent spelling, both forms coexisting in the same year at
+        --     similar volume would be unusual. Possibly a real sub-distinction
+        --     (e.g. active vs retired). No evidence found either way.
+        CASE UPPER(TRIM(COALESCE(CAST(Working_Agency AS STRING), 'UNKNOWN')))
+            WHEN 'LIRR' THEN 'LIR'
+            WHEN 'SIR' THEN 'SIRTOA'
+            ELSE UPPER(TRIM(COALESCE(CAST(Working_Agency AS STRING), 'UNKNOWN')))
+        END AS agency_name,
         UPPER(TRIM(COALESCE(CAST(Title AS STRING), 'UNKNOWN'))) AS job_title,
         UPPER(TRIM(COALESCE(CAST(Department AS STRING), 'UNKNOWN'))) AS department_name,
         UPPER(TRIM(COALESCE(CAST(Pay_Basis AS STRING), 'UNKNOWN'))) AS pay_basis,
