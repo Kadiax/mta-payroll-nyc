@@ -85,9 +85,17 @@ Deep dive into the data engineering foundations of the project:
 
 - **Bus Matrix**: Mapping of business processes to dimensional attributes.
 
-## 🛠 Automation with Makefile and Docker : Getting Started (Reproducibility)
+## ☁️ Production Deployment (GCP)
 
-The entire lifecycle is orchestrated via a `Makefile` to ensure reproducibility across environments.
+The pipeline runs unattended in production on Google Cloud, no local machine involved:
+
+- **CI/CD (GitHub Actions)**: keyless authentication to GCP via **Workload Identity Federation** (no service-account JSON keys anywhere). Manually-triggered (`workflow_dispatch`) pipeline: a `terraform` job provisions the Artifact Registry repo, the data-lake bucket, and the orchestration resources, then a `deploy` job builds one Docker image (tagged by commit SHA) and deploys it as **4 separate Cloud Run Jobs** — one per pipeline stage (`create-datasets`, `extract`, `load`, `transform`) — each running under its own **least-privilege service account** (only the BigQuery/Storage roles that specific stage actually needs, not a shared identity).
+- **Orchestration (Cloud Workflows + Cloud Scheduler)**: replaces the local `Makefile` chain for production runs. A Workflow calls the 4 Cloud Run Jobs sequentially and relies on GCP's built-in execution-failure propagation (no custom retry/error-branching logic needed); Cloud Scheduler triggers it on a monthly cron.
+- **Infrastructure as Code (Terraform)**: two separate state roots — a one-time, manually-applied bootstrap (`setup/`: WIF pool, deploy + runtime service accounts) and a CI-applied application layer (`infra/`: Artifact Registry, data-lake bucket, Workflow, Scheduler). The 4 Cloud Run Jobs themselves are deliberately **not** Terraform-managed (deployed imperatively by CI, matching how BigQuery datasets stay outside Terraform too — see Architecture notes).
+
+## 🛠 Local Development (Makefile and Docker)
+
+The `Makefile` + Docker path is kept for local development and testing — the same containerized code that runs in production.
 
 ### 1. Prerequisites
 
@@ -109,23 +117,23 @@ Before running the pipeline, ensure you have the following installed:
 # Authenticate with Google Cloud
 gcloud auth application-default login
 
+make all   # Build -> Test -> Ingest -> Transform
+```
+
+`config.yaml`, `dbt_mta_payroll/profiles.yml`, and `scripts/schemas/mta_payroll_schema.json` are committed with real (non-secret) values for this deployment — nothing to copy from `.example` for local dev against the same GCP project. To reproduce this project under your **own** GCP project instead (a fresh `project_id`/bucket name — GCS bucket names are globally unique), start from the `.example` files:
+```bash
 cp config.yaml.example config.yaml
 cp dbt_mta_payroll/profiles.yml.example dbt_mta_payroll/profiles.yml
 cp scripts/schemas/mta_payroll_schema.json.example scripts/schemas/mta_payroll_schema.json
-
-# Run full pipeline (Build -> Test -> Ingest -> Transform)
-make all
 ```
 
 ## 🚀 Roadmap & Future Evolutions
 
 ### 🏗️ Pipeline & Orchestration
 
-- Orchestration Upgrade: Transition from Makefile to a Python-native orchestrator like Airflow or Dagster to manage complex task dependencies and retries.
-
 - Advanced Observability: Integrate tools like Elementary or Monte Carlo to monitor pipeline health and schema changes in real-time.
 
-- CI/CD Integration: Implement GitHub Actions to automate python tests, dbt test and dbt run on every Pull Request to ensure production stability.
+- Automated CI Testing: Run `pytest`/`dbt test` on every Pull Request (currently manual — the deploy pipeline itself is CI/CD, but PR-time checks aren't wired up yet).
 
 ### 💎 Data Quality & Governance
 
