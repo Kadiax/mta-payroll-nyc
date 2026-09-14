@@ -24,7 +24,42 @@ This Data Engineering project transforms raw, fragmented Open Data from the New 
   - **Deduplication**: Implementing `row_number()` window functions to ensure "Golden Records" for each employee.
   - **Idempotency**: Using deterministic hashing (`farm_fingerprint`) for surrogate keys and PII anonymization.
 - **BI & Viz (Looker Studio)**: Interactive dashboarding for deep-dive analysis.
-- **Orchestration (Makefile/Docker)**: The entire pipeline is containerized to ensure that the code runs the same way locally as it does on a Compute Engine or Cloud Run instance.
+- **Orchestration (Cloud Workflows + Cloud Scheduler)**: In production, a monthly cron triggers a Workflow that runs the pipeline as 4 sequential Cloud Run Jobs. Locally, the same containerized code runs via `Makefile` — see the "Production Deployment (GCP)" section below.
+
+## 🏛️ Architecture Diagram
+
+```mermaid
+flowchart TD
+    Dev(["👨‍💻 git push /<br/>workflow_dispatch"]) --> CICD
+
+    subgraph CICD["⚙️ CI/CD — GitHub Actions (Workload Identity Federation, no JSON keys)"]
+        direction LR
+        TF["Terraform<br/>provisions infra"] --> DPL["Build & Deploy<br/>Docker image"]
+    end
+
+    DPL -->|push| AR[("Artifact Registry")]
+    DPL -.->|deploys| J1
+
+    subgraph RUN["☁️ Cloud Run Jobs — one dedicated least-privilege service account each"]
+        direction LR
+        J1["1️⃣ create-datasets"] --> J2["2️⃣ extract<br/>+ hash PII"] --> J3["3️⃣ load"] --> J4["4️⃣ transform<br/>dbt build"]
+    end
+
+    SCH["⏰ Cloud Scheduler<br/>monthly cron"] --> WF["🔀 Cloud Workflows<br/>fails fast, no custom retry logic"]
+    WF ==>|orchestrates| J1
+
+    J4 --> BQ[("BigQuery<br/>Bronze → Silver → Gold → Analytics")]
+    BQ --> Looker(["📊 Looker Studio Dashboard"])
+
+    classDef ci fill:#24292e,stroke:#000,color:#fff
+    classDef gcp fill:#4285F4,stroke:#1a56db,color:#fff
+    classDef data fill:#34A853,stroke:#1e7e34,color:#fff
+    classDef bi fill:#EA4335,stroke:#b31412,color:#fff
+    class TF,DPL ci
+    class AR,J1,J2,J3,J4,SCH,WF gcp
+    class BQ data
+    class Looker bi
+```
 
 ## 🔐 Data Governance & Security
 
