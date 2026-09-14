@@ -1,10 +1,11 @@
 name: "CI/CD Pipeline"
 
 on:
-  push:
-    branches: ["main"]
-  # Lets this run manually on any branch to validate the workflow before
-  # merging (push: branches: ["main"] alone never fires on a PR branch).
+  # Manual trigger only — no push: trigger. This pipeline redeploys 4 real
+  # Cloud Run Jobs and can re-apply Terraform; auto-firing on every push to
+  # main (including docs-only commits) risks unintended redeploys while
+  # this repo is under active iteration. Trigger explicitly via
+  # `gh workflow run ci-cd.yml` or the Actions tab.
   workflow_dispatch:
 
 permissions:
