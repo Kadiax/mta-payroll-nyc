@@ -20,11 +20,55 @@ This Data Engineering project transforms raw, fragmented Open Data from the New 
 - **Data Lake (GCS)**: Bronze layer storing raw CSV files for lineage and replayability.
 - **Warehouse (BigQuery)**: Serverless compute for large-scale analytical queries.
 - **Transformation (dbt)**:
-  - **Incremental Modeling**: Optimized processing using `is_incremental()` to reduce costs.
+  - **Incremental Modeling**: `dim_employee` is coded with `is_incremental()` filtering, ready to process only new data — though the pipeline currently always runs `dbt build --full-refresh`, so this cost-saving mode isn't active by default today (see Architecture Notes for details).
   - **Deduplication**: Implementing `row_number()` window functions to ensure "Golden Records" for each employee.
   - **Idempotency**: Using deterministic hashing (`farm_fingerprint`) for surrogate keys and PII anonymization.
 - **BI & Viz (Looker Studio)**: Interactive dashboarding for deep-dive analysis.
-- **Orchestration (Makefile/Docker)**: The entire pipeline is containerized to ensure that the code runs the same way locally as it does on a Compute Engine or Cloud Run instance.
+- **Orchestration (Cloud Workflows + Cloud Scheduler)**: In production, a monthly cron triggers a Workflow that runs the pipeline as 4 sequential Cloud Run Jobs. Locally, the same containerized code runs via `Makefile` — see the "Production Deployment (GCP)" section below.
+
+## 🏛️ Architecture Diagram
+
+```mermaid
+flowchart TD
+    Dev(["👨‍💻 git push /<br/>workflow_dispatch"]) --> CICD
+
+    subgraph CICD["⚙️ CI/CD — GitHub Actions (Workload Identity Federation, no JSON keys)"]
+        direction LR
+        TF["Terraform job"] --> DPL["Build & Deploy job"]
+    end
+
+    TF -->|provisions| INFRA
+
+    subgraph INFRA["Provisioned by Terraform"]
+        direction LR
+        AR[("Artifact Registry")]
+        WF["🔀 Cloud Workflows"]
+        SCH["⏰ Cloud Scheduler<br/>monthly cron"]
+    end
+
+    DPL -->|push| AR
+    DPL -.->|deploys| J1
+
+    subgraph RUN["☁️ Cloud Run Jobs — one dedicated least-privilege service account each"]
+        direction LR
+        J1["1️⃣ create-datasets"] --> J2["2️⃣ extract<br/>+ hash PII"] --> J3["3️⃣ load"] --> J4["4️⃣ transform<br/>dbt build"]
+    end
+
+    SCH --> WF
+    WF ==>|orchestrates| J1
+
+    J4 --> BQ[("BigQuery<br/>Bronze → Silver → Gold → Analytics")]
+    BQ --> Looker(["📊 Looker Studio Dashboard"])
+
+    classDef ci fill:#24292e,stroke:#000,color:#fff
+    classDef gcp fill:#4285F4,stroke:#1a56db,color:#fff
+    classDef data fill:#34A853,stroke:#1e7e34,color:#fff
+    classDef bi fill:#EA4335,stroke:#b31412,color:#fff
+    class TF,DPL ci
+    class AR,J1,J2,J3,J4,SCH,WF gcp
+    class BQ data
+    class Looker bi
+```
 
 ## 🔐 Data Governance & Security
 
@@ -85,9 +129,17 @@ Deep dive into the data engineering foundations of the project:
 
 - **Bus Matrix**: Mapping of business processes to dimensional attributes.
 
-## 🛠 Automation with Makefile and Docker : Getting Started (Reproducibility)
+## ☁️ Production Deployment (GCP)
 
-The entire lifecycle is orchestrated via a `Makefile` to ensure reproducibility across environments.
+The pipeline runs unattended in production on Google Cloud, no local machine involved:
+
+- **CI/CD (GitHub Actions)**: keyless authentication to GCP via **Workload Identity Federation** (no service-account JSON keys anywhere). Manually-triggered (`workflow_dispatch`) pipeline: a `terraform` job provisions the Artifact Registry repo, the data-lake bucket, and the orchestration resources, then a `deploy` job builds one Docker image (tagged by commit SHA) and deploys it as **4 separate Cloud Run Jobs** — one per pipeline stage (`create-datasets`, `extract`, `load`, `transform`) — each running under its own **least-privilege service account** (only the BigQuery/Storage roles that specific stage actually needs, not a shared identity).
+- **Orchestration (Cloud Workflows + Cloud Scheduler)**: replaces the local `Makefile` chain for production runs. A Workflow calls the 4 Cloud Run Jobs sequentially and relies on GCP's built-in execution-failure propagation (no custom retry/error-branching logic needed); Cloud Scheduler triggers it on a monthly cron.
+- **Infrastructure as Code (Terraform)**: two separate state roots — a one-time, manually-applied bootstrap (`setup/`: WIF pool, deploy + runtime service accounts) and a CI-applied application layer (`infra/`: Artifact Registry, data-lake bucket, Workflow, Scheduler). The 4 Cloud Run Jobs themselves are deliberately **not** Terraform-managed (deployed imperatively by CI, matching how BigQuery datasets stay outside Terraform too — see Architecture notes).
+
+## 🛠 Local Development (Makefile and Docker)
+
+The `Makefile` + Docker path is kept for local development and testing — the same containerized code that runs in production.
 
 ### 1. Prerequisites
 
@@ -109,23 +161,23 @@ Before running the pipeline, ensure you have the following installed:
 # Authenticate with Google Cloud
 gcloud auth application-default login
 
+make all   # Build -> Test -> Ingest -> Transform
+```
+
+`config.yaml`, `dbt_mta_payroll/profiles.yml`, and `scripts/schemas/mta_payroll_schema.json` are committed with real (non-secret) values for this deployment — nothing to copy from `.example` for local dev against the same GCP project. To reproduce this project under your **own** GCP project instead (a fresh `project_id`/bucket name — GCS bucket names are globally unique), start from the `.example` files:
+```bash
 cp config.yaml.example config.yaml
 cp dbt_mta_payroll/profiles.yml.example dbt_mta_payroll/profiles.yml
 cp scripts/schemas/mta_payroll_schema.json.example scripts/schemas/mta_payroll_schema.json
-
-# Run full pipeline (Build -> Test -> Ingest -> Transform)
-make all
 ```
 
 ## 🚀 Roadmap & Future Evolutions
 
 ### 🏗️ Pipeline & Orchestration
 
-- Orchestration Upgrade: Transition from Makefile to a Python-native orchestrator like Airflow or Dagster to manage complex task dependencies and retries.
-
 - Advanced Observability: Integrate tools like Elementary or Monte Carlo to monitor pipeline health and schema changes in real-time.
 
-- CI/CD Integration: Implement GitHub Actions to automate python tests, dbt test and dbt run on every Pull Request to ensure production stability.
+- Automated CI Testing: Run `pytest`/`dbt test` on every Pull Request (currently manual — the deploy pipeline itself is CI/CD, but PR-time checks aren't wired up yet).
 
 ### 💎 Data Quality & Governance
 
