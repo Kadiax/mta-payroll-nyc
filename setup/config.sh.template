@@ -1,0 +1,11 @@
+# setup/config.sh.template
+#
+# Committed trace of the shape of config.sh — the real file (with actual
+# values) stays strictly local, never committed (see .gitignore).
+#
+# To actually bootstrap: copy this to setup/config.sh (untracked) and
+# replace every XXX with the real value. Sourced by grant-bootstrap-roles.sh
+# (this repo) and by setup/teardown.sh later (gcp-teardown skill).
+
+PROJECT_ID="XXX"
+REGION="XXX"

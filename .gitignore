@@ -61,3 +61,76 @@ elementary_output/
 *.csv
 /data/
 documentation/plan/
+
+.claude
+
+PROGRESS.md
+
+# ==========================================
+# Terraform
+# ==========================================
+
+# Dossier local des providers téléchargés (peut être volumineux, régénéré à chaque `terraform init`)
+**/.terraform/*
+
+# Fichiers de lock du provider (à garder normalement versionné, mais exclu ici
+# si tu veux le régénérer systématiquement — décommente la ligne suivante si besoin)
+# .terraform.lock.hcl
+
+# State Terraform — NE JAMAIS committer, contient potentiellement des données sensibles
+# (utilisé seulement en local pour setup/, qui n'a pas de backend distant)
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+
+# Fichiers de variables contenant des valeurs sensibles — jamais commité,
+# même quand le contenu réel ne l'est pas (ex: terraform.tfvars rempli avec
+# de vrais noms de repo/pool/SA/bucket, gcp-wif-bootstrap / gcp-
+# artifact-registry-cicd). Reste strictement local. Ne matche pas
+# *.tfvars.template (extension différente) — c'est la trace committée dans
+# le repo, avec des valeurs XXX, jamais les vraies.
+*.tfvars
+*.tfvars.json
+!example.tfvars
+
+# Plans Terraform sauvegardés (peuvent contenir des données sensibles en clair)
+*.tfplan
+crash.log
+crash.*.log
+
+# Override files (utilisés localement pour tester, jamais à committer)
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# CLI config (peut contenir des credentials Terraform Cloud/Enterprise)
+.terraformrc
+terraform.rc
+
+# ==========================================
+# Credentials GCP — ne jamais committer de clé
+# ==========================================
+*.json
+!package.json
+!package-lock.json
+*service-account*.json
+*credentials*.json
+gcp-key.json
+
+# ==========================================
+# Divers / environnement local
+# ==========================================
+.env
+.env.*
+# config.sh / gh-vars-config.sh — bash equivalent of a .env file
+# (gcp-wif-bootstrap / gcp-teardown / gcp-artifact-registry-cicd):
+# PROJECT_ID/REGION/etc, never committed even though not secret, same
+# reasoning as *.tfvars above. Committed trace is each one's
+# *-template.sh, a different filename so it's unaffected by this rule.
+config.sh
+gh-vars-config.sh
+.DS_Store
+*.log
+.vscode/
+.idea/
